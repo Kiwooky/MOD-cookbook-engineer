@@ -11,6 +11,8 @@ The MOD UI caches plugin info and images by URI + version. Same version after a 
 A MIDI-learned control works in the audio, but no browser shows the change; meters freeze too. On-device footswitch changes still show. mod-host only sends feedback after mod-ui sends `output_data_ready`, which waits for a browser to confirm `data_ready <counter>`; that handshake can stall.
 
 - **Reproducible on 1.14.0 RC (build 3366):** put the computer to sleep with the MOD UI open, wake it, reload when asked. The pedalboard looks fine, but feedback never updates.
+- **It also freezes every face that shows live values** (meters, `modgui:monitoredOutputs`): the face looks broken while the plugin is fine. Seen on 1.14 RC with Trance Atlantic's orb.
+- **Diagnose in 10 s:** in the browser console on the pedalboard page, run `var c={},h=function(e){var k=String(e.data).split(' ')[0];c[k]=(c[k]||0)+1};ws.addEventListener('message',h);setTimeout(function(){ws.removeEventListener('message',h);console.log(JSON.stringify(c))},10000)` while playing. Only `ping`, `stats` and `sys_stats` = stalled. `data_ready` but no `output_set` = mod-host isn't monitoring your output (re-add the plugin). Verified on a Duo.
 - **Workaround:** close every MOD UI tab (or reboot), or run in the MOD tab: `javascript:(()=>{for(let n=0;n<=5000;n++)ws.send('data_ready '+n)})()`. Mismatched counters are ignored, so it's harmless, but only use it when updates have actually stopped.
 
 ## Old iPads can't load the MOD OS 1.14 UI

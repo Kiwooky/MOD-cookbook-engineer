@@ -12,6 +12,8 @@
  *   ctlN    : values for control ports in index order (ports n_in+n_out ...)
  *   @S:P=V  : at sample S set control port index P to V; repeatable (up to 64),
  *             applied at the start of the 256-frame block containing S
+ *   PB_TRACE_PORT=<index> PB_TRACE_FILE=<path> (environment): after every block, append
+ *             that control port's value (float32) to the file: reads output ports
  */
 #include <dlfcn.h>
 #include <stdio.h>
@@ -53,6 +55,8 @@ int main(int c, char** v) {
         else { ctl[nc] = atof(v[a]); d->connect_port(h, ni + no + nc, &ctl[nc]); nc++; } }
     for (int i = 0; i < ni; i++) d->connect_port(h, i, ib[i]);
     for (int i = 0; i < no; i++) d->connect_port(h, ni + i, ob[i]);
+    const char* trf = getenv("PB_TRACE_FILE"); const char* trp = getenv("PB_TRACE_PORT");
+    FILE* tf = (trf && trp) ? fopen(trf, "wb") : 0; int ti = trp ? atoi(trp) - ni - no : -1;
     d->activate(h);
     for (long p = 0; p < n; p += bs) {
         long k = (n - p < bs) ? n - p : bs;
@@ -60,6 +64,8 @@ int main(int c, char** v) {
             if (evS[e] >= 0 && p + k > evS[e]) { ctl[evP[e] - ni - no] = evV[e]; evS[e] = -1; }
         for (long s = 0; s < k; s++) for (int i = 0; i < ni; i++) ib[i][s] = in[(p + s) * ni + i];
         d->run(h, k);
+        if (tf && ti >= 0 && ti < nc) fwrite(&ctl[ti], 4, 1, tf);
         for (long s = 0; s < k; s++) for (int i = 0; i < no; i++) out[(p + s) * no + i] = ob[i][s]; }
+    if (tf) fclose(tf);
     f = fopen(v[3], "wb"); fwrite(out, 4, n * no, f); fclose(f);
     d->deactivate(h); d->cleanup(h); return 0; }

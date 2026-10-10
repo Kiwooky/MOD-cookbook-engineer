@@ -15,7 +15,8 @@ import argparse, datetime, os, subprocess, urllib.request
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 COOKBOOK_RAW = 'https://raw.githubusercontent.com/mod-audio/mod-plugin-cookbook/main/'
 DOCS = ['docs/effect-profile.md', 'docs/path-a-single-recipe.md', 'docs/lv2-and-mod-rules.md',
-        'docs/dsp.md', 'docs/hardware-feedback.md', 'docs/modgui.md']
+        'docs/dsp.md', 'docs/dsp-time.md', 'docs/dsp-reverb.md', 'docs/dsp-drive.md',
+        'docs/dsp-envelope.md', 'docs/dsp-pitch.md', 'docs/hardware-feedback.md', 'docs/modgui.md']
 TEMPLATE = [('templates/plugin/plugins/simple-echo/SimpleEchoPlugin.cpp', 'cpp'),
             ('templates/plugin/plugins/simple-echo/DistrhoPluginInfo.h', 'cpp'),
             ('templates/plugin/plugins/simple-echo/Makefile', 'makefile'),

@@ -13,6 +13,7 @@
 - Knobs: `mod-role="input-control-port" mod-port-symbol="<symbol>"` (the default *film* widget).
 - **Buttons and toggles: add `mod-widget="switch"`.** The film widget ignores a click if the mouse moves a couple of pixels, which feels broken. The switch widget sets class `on`/`off`.
 - Bypass: `mod-role="bypass"`. Its classes are inverted: `on` = **bypassed**, `off` = active.
+- **A separate On/Off light:** `mod-role="bypass-light"` gets class `on` while the effect is **on** (not inverted). The light can sit away from the footswitch; it isn't clickable. Verified on a Duo.
 - **Multi-position switches (enumerations):** a film works, but a click only steps to the next position and wraps, whatever part of it you click. To let people click the position they want, lay transparent click zones (plain divs, no `mod-role`, higher `z-index`) over each position and have the face script call `funcs.set_port_value('<symbol>', value)` on click. The film still draws the switch. (the digital delay's range lever.)
 - Audio jacks: copy the `{{#effect.ports.audio.input}}…` blocks from a stock template.
 
@@ -20,7 +21,7 @@
 
 Prefix every selector with `.yourclass{{{cns}}}`; load images as `url(/resources/<file>{{{ns}}})`.
 
-**Filmstrips** (one horizontal row, frame 0 = minimum):
+**Filmstrips** (one horizontal row, frame 0 = minimum; mod-ui reads horizontal strips only, so convert vertical exports such as HISE's; checked in `modgui.js`):
 - frames = strip width ÷ **element width** (frames needn't be square)
 - frame shown = round((value − min)/(max − min) × steps), on a log scale for logarithmic ports
 - the same strip can be drawn smaller with `background-size: auto <h>px` (trim pots, or 2× strips on retina)
@@ -34,7 +35,20 @@ Prefix every selector with `.yourclass{{{cns}}}`; load images as `url(/resources
 - **Script-driven controls:** plain elements (no `mod-role`) that the script binds on `start` and that call `funcs.set_port_value`. Mark each with an attribute whose value is the port symbol (`<div my-switch="tails">`, `<div my-bank="echo_taps" my-bit="0">`): the script finds them with it, and so does `tools/face_click_test.py`. Handle `touchstart` as well as `mousedown` (`preventDefault`, and ignore emulated mouse events for about 1 s after a touch), and act on press. The BBD echo's Tail, Range and mode switches work this way after the film widget failed on a Duo; tested with mod-ui's code, mouse and touch.
 - **Radio banks with "hold to add":** one integer port per bank holding a bitmask (1–15 for four buttons, each value with a scale point like `E1+E3`, so the unit's screen, footswitch stepping and presets all work). The script: tap = that button only; hold about 0.5 s (fire while still held) or shift-click = add or remove it; the last button down can't be removed. The BBD echo's Echo and Reverb banks (the original latched several buttons only if pressed together). Tested with mouse and touch.
 - **Swap a strip's artwork with a class.** The film widget only ever sets `background-position`, so a class that changes `background-image` (same frame size) keeps the widget working. The digital delay swaps its range legend between original and doubled times when Time Mod changes. (Source-checked and tested headless; not yet confirmed on a unit.)
-- Other uses: dim controls that are locked by a switch.
+- Other uses: dim controls that are locked by a switch. Status lights that show which controls a mode switch makes live are the same trick: plain elements the script gives an `on` class.
+
+## Live values from the plugin (meters, glows)
+
+- **Declare the output in `modgui.ttl`:** `modgui:monitoredOutputs [ lv2:symbol "<symbol>" ] ;`. The values arrive in the script as `change` events for that symbol. Only an output listed there is sent to the face. Verified on a Duo.
+- **mod-ui asks mod-host for them when the plugin is added** (or the pedalboard loads), and mod-host sends a value only when it changes. After installing a new version: remove the plugin, add it again.
+- **A few updates a second, not per sample.** For something that should follow the playing, output a peak follower with instant rise and about 150–200 ms fall, mapped in dB (about −48 to −12 dBFS → 0 to 1), so every pluck is caught. Raising it to a power (^1.5) favours attacks over sustain. Tuned by eye on a Duo.
+- **Check the art's own opacity.** A layer that's 25% opaque at its most solid, at a typical value of 0.3, shows about 8%: invisible. The first hardware test saw nothing at all.
+- **Nothing arrives? Check the MOD side first** (`known-mod-issues.md`, the `data_ready` stall): the face looks broken while the plugin is fine.
+- **Test the output offline:** `Plugin.run(..., trace='<symbol>')` in `tools/lv2test.py` returns its value per block.
+
+## Readouts
+
+**Pre-render text as image strips; don't load a web font.** A free TTF loaded with `@font-face` from the face's resources didn't render on a Duo (it loaded fine when mod-ui's loading was reproduced in Chromium; cause unknown). One frame per value (`#00`–`#24`, `OFF`/`FIX`/`ENV`), picked by the script with `background-position`, works in every browser. Render the strip from the font with Pillow (`ImageDraw.text(..., anchor='mm')`), 2× size, saved as a 256-colour PNG. Verified on a Duo.
 
 ## Testing a face
 
@@ -114,5 +128,5 @@ The designer supplies: a background with **black placeholder holes** where contr
 - Fit control positions to the centres of the holes. **If the designer sent a mockup, fit by template matching:** composite each sprite onto the background at candidate positions near the hole and keep the one with the least pixel error against the mockup. The BBD echo: zero error for every button and switch.
 - **Output jacks can sit on printed legends.** mod-ui draws each jack 56 px tall with a 13 px gap (69 px pitch), starting at the `.mod-pedal-output` element's `top`. Set that `top`, and change the pitch with `.mod-pedal.<yourclass>{{{cns}}} .mod-pedal-output .mod-audio-output { margin-bottom: … }`. The BBD echo's jacks sit on its MIX and 100% WET arrows (rendered with mod-ui's CSS rules; not yet seen on a unit).
 - **When the art names a control differently, change port names and scale-point labels, never symbols.** The BBD echo's face says REVERB where the ports said "Hall": the unit's screen now matches the art and saved settings still load.
-- Budget: background JPEG q88, strips as 256-colour PNGs; a whole face of about 200 KB is typical.
-- Preview interactively before uploading; the human signs off the look.
+- Budget: background JPEG q88, strips as 256-colour PNGs; a whole face of about 200 KB is typical. **Save every PNG as 256-colour**, including layers you edit later: one re-saved as full RGBA grew from 41 KB to 157 KB and pushed a recipe past the builder's limit (`path-a-single-recipe.md`).
+- **Mockup first.** Before the real face, build an interactive HTML page with the real art and the script's logic (knobs, buttons, lights, readouts, a simulated meter) and let the designer sign it off. Find each control's position by diffing the mockup against the empty background (connected components of the changed pixels). Trance Atlantic's face moved from the mockup to modgui almost unchanged; check fine positions by overlaying a crop (a half-pixel slip put two lights out of their housings).

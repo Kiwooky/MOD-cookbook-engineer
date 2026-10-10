@@ -21,6 +21,7 @@ lv2:extensionData <http://lv2plug.in/ns/ext/options#interface> ;
 
 - **Logarithmic knobs** (`pprops:logarithmic` + DPF `kParameterIsLogarithmic`) for time and frequency. mod-ui maps their position on a log scale.
 - **Enumerations** (`lv2:enumeration` + `lv2:scalePoint`, DPF `enumValues`) for switches with labelled positions.
+- **Units DPF doesn't know** (`dB`, `Hz`, `kHz`, `ms`, `s` and `%` are mapped) become a custom unit: `units:unit [ a units:Unit ; rdfs:label "st" ; units:symbol "st" ; units:render "%f st" ]`. MOD shows `%f` with six decimals; make the port integer (`kParameterIsInteger`, `lv2:integer`) and the render is `%d st`. Copy DPF's form exactly (`tools/ttlcmp.py` compares it).
 
 ## Bypass in the plugin
 
@@ -44,6 +45,7 @@ Two jobs, one number. On every path it's a **cache-buster**; on path B it's also
 - Keep `lv2:minorVersion` even and ≥ 2 (0 = pre-release, odd = unstable by LV2 convention).
 - **Keep DPF's `d_version()` in step:** major > 0 → minorVersion = minor + 2, microVersion = micro. `d_version(1,0,3)` ↔ minor 2, micro 3.
 - **Ship a face from the first upload.**
+- **The category and factory presets are cached too.** Changing `lv2:ReverbPlugin` to another class, or adding presets, needs a version bump to show.
 - **Stale-cache check:** hard-refresh the MOD UI (Cmd/Ctrl+Shift+R), or open `http://192.168.51.1/effect/get?uri=<uri>&nocache=1`.
 
 ## Ports are forever (once shared)

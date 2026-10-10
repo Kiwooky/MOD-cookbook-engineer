@@ -29,7 +29,10 @@ Tick these at the end of the concept stage and put them at the top of the spec. 
 | **Modulated delay** (an LFO moves a delay tap) | chorus, flanger, vibrato, tape wow | Interpolated reads (Hermite for audible taps); pitch deviation scaled by delay time | Pitch wobble in cents (`warble_cents`) |
 | **Stereo** | reverb, ping-pong, chorus, auto-pan | Opposite-polarity outputs cancel in mono; say so | Decorrelation; mono sum still sounds right |
 | **Has a Mix knob** | most time-based effects | Dry at unity in bypass whatever Mix says | Bypass at Mix 100 |
+| **Pitch from a moving delay** | vibrato, Doppler, swoops, whammy-style dives | Upward bends cost latency; downward ones never below zero speed; filter before the bend (`dsp-pitch.md`) | Peak swoop in semitones at three rates; pitch tracking that skips silence and takes medians |
 | **Instrument / MIDI** (no audio input) | synth, drum voice | Not yet covered by this playbook. MOD's bypass silences these rather than passing audio. Say so, and harvest what you learn (`harvesting.md`) | — |
+
+**Read only the DSP files your traits need.** `dsp.md` (every plugin), then: tail, feedback, buffer or modulated delay → `dsp-time.md`; reverb → `dsp-reverb.md`; nonlinear / gain → `dsp-drive.md`; level-sensitive → `dsp-envelope.md`; pitch from a moving delay → `dsp-pitch.md`. A chorus or flanger is a modulated delay; a wah or compressor is level-sensitive; an underwater reverb with a pitch swoop reads four of them.
 
 ## 3. Stripping the template
 

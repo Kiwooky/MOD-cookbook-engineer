@@ -2,7 +2,7 @@
 
 In a plugin's test script:
 
-    from lv2test import Plugin, check, done, db, rms, centroid, tick_count, warble_cents, pluck_train, rt60, onset_ms
+    from lv2test import Plugin, check, done, db, rms, centroid, tick_count, warble_cents, pluck_train, harmonic_pluck_train, rt60, onset_ms
     p = Plugin(order=['time', 'feedback', 'mix', 'tails', 'lv2_enabled'],
                defaults=dict(time=350, feedback=40, mix=35, tails=1, lv2_enabled=1),
                n_in=1, n_out=1)
@@ -37,8 +37,10 @@ class Plugin:
         if not self.so:
             sys.exit('set PB_SO to the plugin .so (tools/check.sh does this)')
 
-    def run(self, x, sr=48000, events=(), **controls):
-        """x: (frames,) or (frames, n_in). events: [(sample, symbol, value), ...]"""
+    def run(self, x, sr=48000, events=(), trace=None, **controls):
+        """x: (frames,) or (frames, n_in). events: [(sample, symbol, value), ...]
+        trace: an output control port's symbol (listed in `order`); then returns
+        (audio, values), with the port's value after every 256-frame block."""
         unknown = set(controls) - set(self.order)
         if unknown:
             raise KeyError('unknown control(s): %s' % ', '.join(sorted(unknown)))
@@ -52,8 +54,15 @@ class Plugin:
             args = self.host + [self.so, fi, fo, str(sr), str(self.n_in), str(self.n_out)]
             args += ['%g' % c[k] for k in self.order]
             args += ['@%d:%d=%g' % (s, self.port[k], v) for s, k, v in events]
-            subprocess.run(args, check=True, stdout=subprocess.DEVNULL)
-            return np.fromfile(fo, np.float32).reshape(-1, self.n_out)
+            env = None
+            if trace:
+                ft = os.path.join(d, 't.raw')
+                env = dict(os.environ, PB_TRACE_PORT=str(self.port[trace]), PB_TRACE_FILE=ft)
+            subprocess.run(args, check=True, stdout=subprocess.DEVNULL, env=env)
+            y = np.fromfile(fo, np.float32).reshape(-1, self.n_out)
+            if trace:
+                return y, np.fromfile(ft, np.float32)
+            return y
 
 
 def check(name, ok, info=''):
@@ -98,6 +107,29 @@ def pluck_train(sr, seconds=10.0, level=0.15, notes=(196, 247, 147, 330, 220, 16
         a = np.arange(L)
         env = np.exp(-a / (0.3 * sr)) * np.minimum(1, a / (0.002 * sr)) * np.minimum(1, (L - a) / (0.05 * sr))
         x[n:n + L] += level * env * np.sin(2 * np.pi * f * a / sr)
+    return x
+
+
+def harmonic_pluck_train(sr, seconds=10.0, level=0.15, notes=(196, 247, 147, 330, 220, 165), every=1.5,
+                         decay=0.6, attack=0.005):
+    """Guitar-like plucks with 24 harmonics at 1/n, higher ones dying faster; each
+    note peaks at `level` (0.15 = about -16 dBFS). Use this for anything that
+    filters or sweeps: pure-sine plucks barely move an envelope filter. Attacks
+    shorter than about 5 ms read as ticks in tick_count on their own."""
+    x = np.zeros(int(seconds * sr))
+    for k, f in enumerate(notes):
+        n = int((0.2 + every * k) * sr)
+        L = min(int(1.4 * sr), len(x) - n)
+        if L <= 0:
+            break
+        t = np.arange(L) / sr
+        s = np.zeros(L)
+        for h in range(1, 25):
+            if h * f > 0.45 * sr:
+                break
+            s += np.sin(2 * np.pi * h * f * t + 0.3 * h) / h * np.exp(-t / (decay / h ** 0.6))
+        s *= np.minimum(1, t / attack) * np.minimum(1, (t[-1] - t) / 0.05)
+        x[n:n + L] += s / np.abs(s).max() * level
     return x
 
 

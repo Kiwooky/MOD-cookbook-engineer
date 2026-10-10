@@ -8,7 +8,7 @@ The same stages for both paths. Each ends with something checkable. Skipping one
 | 1 | **Concept** (`effect-profile.md`) | One paragraph on what it is and why it sounds like itself, researched to fit the starting point (imagined, reference sound, specific gear); the traits ticked |
 | 2 | **Spec** (`templates/spec-template.md`) | Controls with ranges and defaults; every mapping marked *guess* or *measured*; a sources table |
 | 3 | **Ports** | The port table is settled; it can still change until the first public share, then never again |
-| 4 | **DSP** (`dsp.md`) | Builds clean on three targets |
+| 4 | **DSP** (`dsp.md` + your trait files) | Builds clean on three targets |
 | 5 | **Tests** (`testing.md`) | Generic checks plus one per promise in the spec; all pass natively and on the Duo build under qemu |
 | 6 | **Face** (`modgui.md`) | Stock, placeholder or real; screenshot and thumbnail rendered; ships with the first upload |
 | 7 | **Upload + play** | The human installs it and plays it; the agent asks what they heard (`hardware-feedback.md`) |

@@ -32,6 +32,8 @@ The URI is your repo URL (`https://github.com/<owner>/<repo>`), set in `DISTRHO_
 4. Paste it into the package `.mk` as `<P>_VERSION`. You don't need to commit this edit before uploading: the builder reads the `.mk` you upload, then fetches the code at that hash.
 5. Upload the package `.mk` at builder.mod.audio and install. The filename must match the prefix (`mybrand-echo.mk` ↔ `MYBRAND_ECHO_`).
 
+**An agent that can't push** (a cloud session without the owner's GitHub access): make the commit there, `git bundle create x.bundle <base>..HEAD`, copy the bundle into the person's clone (not into `.git`), then `git fetch x.bundle HEAD && git reset --keep FETCH_HEAD` and delete the bundle. The person pushes from GitHub Desktop as usual. Give each regenerated bundle a new filename: one rewritten under the same name in the same batch of tool calls arrived as the old copy. Verified.
+
 ## Continuous checks
 
 `templates/plugin/.github/workflows/check.yml` runs `tools/check.sh` on every push and pull request, so a change from anyone (or anyone's agent) arrives proven. It expects the playbook's `tools/` in the repo; copy the folder in. (The workflow is written but has not yet been run on GitHub; check the first run's log.)

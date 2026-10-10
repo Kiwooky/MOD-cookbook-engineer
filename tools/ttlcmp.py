@@ -16,6 +16,13 @@ L = rdflib.Namespace('http://lv2plug.in/ns/lv2core#')
 IGNORE_PROPS = {'http://moddevices.com/ns/mod#preferMomentaryOnByDefault'}
 
 
+def node(g, o):
+    """A blank node (e.g. a custom unit) compares by its contents, not its random ID."""
+    if isinstance(o, rdflib.BNode):
+        return '[' + '; '.join(sorted('%s %s' % (str(k).split('#')[-1], node(g, v)) for k, v in g.predicate_objects(o))) + ']'
+    return str(o)
+
+
 def load(f):
     g = rdflib.Graph(); g.parse(f, format='turtle')
     ports, audio = {}, set()
@@ -26,7 +33,7 @@ def load(f):
         d = {}
         for k in set(g.predicates(p)):
             key = str(k).split('#')[-1].split('/')[-1]
-            vals = sorted(str(o) for o in g.objects(p, k) if str(o) not in IGNORE_PROPS)
+            vals = sorted(node(g, o) for o in g.objects(p, k) if str(o) not in IGNORE_PROPS)
             if key != 'scalePoint':
                 d[key] = vals
         if str(L['AudioPort']) in d.get('type', []):
@@ -53,7 +60,8 @@ for i in sorted(set(a) | set(b)):
         if x == y:
             continue
         try:
-            if x and y and [float(v) for v in x] == [float(v) for v in y]:
+            # float32 in DPF vs decimal by hand: 80.71 is written 80.7099990845
+            if x and y and len(x) == len(y) and all(abs(float(p) - float(q)) <= 1e-5 * max(1.0, abs(float(q))) for p, q in zip(x, y)):
                 continue
         except ValueError:
             pass

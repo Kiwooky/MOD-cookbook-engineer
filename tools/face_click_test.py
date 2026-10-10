@@ -193,6 +193,24 @@ async def run(info, modui):
                         notes.append('%-14s not on the face (settings only)' % sym)
                         continue
                     props = port['properties']
+                    steppers = [e for e in els if await e.evaluate('el => Array.prototype.some.call(el.attributes, a => /step/.test(a.name))')]
+                    if steppers:
+                        # a step button (attribute name contains "step", e.g. ta-step="mode"): every
+                        # press, clean, wobbly or tapped, must move to a new value
+                        box = await steppers[0].bounding_box()
+                        cx, cy = box['x'] + box['width'] / 2, box['y'] + box['height'] / 2
+                        seq, ok = [], True
+                        for w, t in ((0, 0), (0, 0), (2, 0), (2, 0), (0, 1), (0, 1)):
+                            before = cur[sym]
+                            _, _, v = await press(sym, cx, cy, w, bool(t))
+                            seq.append('%s%g' % ('~' if w else '^' if t else '', v))
+                            ok &= v != before
+                        await pg.wait_for_timeout(1200)
+                        line = '%-14s script step   after each press (~ = wobble, ^ = touch tap): %s' % (sym, ', '.join(seq))
+                        (notes if ok else fails).append(line if ok else 'FAIL ' + line)
+                        els = [e for e in els if e not in steppers]
+                        if not els:
+                            continue
                     if 'toggled' in props or (len(els) == 1 and len(port['scalePoints']) == 2):
                         box = await els[0].bounding_box()
                         cx, cy = box['x'] + box['width'] / 2, box['y'] + box['height'] / 2

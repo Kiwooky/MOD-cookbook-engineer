@@ -2,7 +2,7 @@
 
 Agents follow rules better when they know why. Add to this file whenever something costs you a round trip. Format: **Rule.** What happened. Where the rule now lives.
 
-The incidents come from four plugins built while writing this playbook: a hall reverb, a bucket-brigade (BBD) echo, an early digital delay with a compander, and an oil-can delay.
+The incidents come from five plugins built while writing this playbook: a hall reverb, a bucket-brigade (BBD) echo, an early digital delay with a compander, an oil-can delay, and Trance Atlantic (an envelope pitch swoop into an underwater reverb). DSP rules now live in `dsp.md` (every plugin) and per-trait files (`dsp-time.md`, `dsp-reverb.md`, `dsp-drive.md`, `dsp-envelope.md`, `dsp-pitch.md`).
 
 ## Build and packaging
 
@@ -14,6 +14,8 @@ The incidents come from four plugins built while writing this playbook: a hall r
 - **The package file needs the full 40-character commit hash.** (`path-b-github-repo.md`)
 - **Compare the hand-written TTL with DPF's generator on every build.** It is the only check that the code and the metadata agree. (`tools/ttlcmp.py`)
 - **Build the path-B package `.mk` locally before its first upload, with `TARGET_DIR` set inside the harness.** The digital delay's first local package build failed at the bundle step: `TARGET_DIR` passed on the make command line overrode DPF's own `TARGET_DIR` in every sub-make, so the plugin binary landed elsewhere. In tests. (`tools/package_harness.mk`, `path-b-github-repo.md`)
+- **builder.mod.audio silently refuses recipes near 1 MB.** Trance Atlantic's 998 KB `.mk` went from "preparing" straight to "ready" with no error; 888 KB had built. A single overlay re-saved as full RGBA (157 KB, 41 KB as 256-colour) had pushed it over. Verified on the builder. (`path-a-single-recipe.md`, `modgui.md`)
+- **An agent without push access can still deliver a commit:** a git bundle copied into the person's clone, fetched and fast-forwarded there; they push. A bundle regenerated under the same name in the same batch arrived as the old copy: use a new name. Verified. (`path-b-github-repo.md`)
 - **GitHub's web uploader takes 100 files and can't add submodules.** The digital delay's first push went through GitHub Desktop, and dragging the folder in Finder left the hidden `.gitignore` behind. Verified. (`path-b-github-repo.md`)
 - **`scp` from a recent Mac needs `-O` to reach a MOD.** Fetching the BBD echo's presets failed with "subsystem request failed on channel 0": macOS `scp` now uses SFTP, which the MOD doesn't serve. Verified. (`presets.md`)
 - **The agent can find the commit hash itself:** `git ls-remote https://github.com/<owner>/<repo>` works on a public repo without credentials. Verified. (`path-b-github-repo.md`)
@@ -23,20 +25,27 @@ The incidents come from four plugins built while writing this playbook: a hall r
 - **Measure before you claim.** The oil-can delay's CPU was first predicted "well under the hall reverb"; it measured 1.25×, later 0.7× after removing the noise section, then 1.2× with oversampling. Only measurements went into the docs after that. (`dsp.md`)
 - **Players want movement, not dirt.** Modelled hiss and hum were switched off within seconds in the first hardware test; the warble they made in the tails was the part worth keeping. (`dsp.md`)
 - **Test at guitar level.** Sag was tuned for hot signals and barely reacted to a guitar at about −20 dBFS. (`testing.md`)
-- **Soft-limit effects that can run away (wet path).** The oil-can delay 1.0.2's runaway peaked at +3.8 dBFS and hard-clipped at the converter: "digital ticks". (`dsp.md`)
-- **Oversample saturators inside feedback loops.** Short-time runaways re-sharpened and aliased their own edges every lap. (`dsp.md`)
-- **Map feedback edges on a grid, and make the edge playable.** A "one runaway path" fix moved the oil-can delay's runaway point to Repeat 9.3; on hardware it "would not oscillate any more". A Repeat × Reverb grid put the edge across several knob positions. (`dsp.md`, `testing.md`)
-- **Scale speed modulation by speed.** A fixed percentage of delay time wobbled long delays five times harder; stock warble went from 20 cents RMS (seasick) to a steady 4.5. (`dsp.md`)
-- **Model a compander with the compressor sensing its own output.** The digital delay's NE570 model first sensed the compressor's input: every attack came out about +16 dB hot because the expander couldn't track it. With the rectifier on the output (as in the chip), compressor and expander cancel even during attacks. In tests. (`dsp.md`)
+- **Soft-limit effects that can run away (wet path).** The oil-can delay 1.0.2's runaway peaked at +3.8 dBFS and hard-clipped at the converter: "digital ticks". (`dsp.md`, `dsp-time.md`)
+- **Oversample saturators inside feedback loops.** Short-time runaways re-sharpened and aliased their own edges every lap. (`dsp-time.md`)
+- **Map feedback edges on a grid, and make the edge playable.** A "one runaway path" fix moved the oil-can delay's runaway point to Repeat 9.3; on hardware it "would not oscillate any more". A Repeat × Reverb grid put the edge across several knob positions. (`dsp-time.md`, `testing.md`)
+- **Scale speed modulation by speed.** A fixed percentage of delay time wobbled long delays five times harder; stock warble went from 20 cents RMS (seasick) to a steady 4.5. (`dsp-time.md`)
+- **Model a compander with the compressor sensing its own output.** The digital delay's NE570 model first sensed the compressor's input: every attack came out about +16 dB hot because the expander couldn't track it. With the rectifier on the output (as in the chip), compressor and expander cancel even during attacks. In tests. (`dsp-time.md`)
 - **Two outputs with opposite-polarity wet cancel when summed to mono.** The digital delay's Output 2 (stereo width, as on the original) loses its echoes if both outputs reach one mono input; the MOD sums several connections into one input. Believed (standard JACK summing). (`dsp.md`)
 - **Land one-pole smoothers on their target.** The BBD echo's "dry at unity" measured 1 + 3e-5 with Volume above 5: in float the last steps are too small to register. Snap at the end of the block. In tests. (`dsp.md`)
-- **A noise floor plus any loop gain above 1, at any frequency, self-oscillates.** The BBD echo's loop ran away from its own hiss at Duration 7.7, below unity at DC, because the in-loop filters peak slightly. "Soft stays stable, hard tips over" needs gain that rises with level, not a compressive clip. In tests. (`dsp.md`)
+- **A noise floor plus any loop gain above 1, at any frequency, self-oscillates.** The BBD echo's loop ran away from its own hiss at Duration 7.7, below unity at DC, because the in-loop filters peak slightly. "Soft stays stable, hard tips over" needs gain that rises with level, not a compressive clip. In tests. (`dsp-time.md`)
 - **Model resistor mixing networks as passive buses.** Plain summing made the BBD echo's stacked buttons far too loud; V = Σ(G·V) ÷ (ΣG + G_load) makes combinations fuller but less than additive, as on the hardware. In tests. (`dsp.md`)
 - **Two controls that sound alike are a design bug, not a user problem.** Repeat and Reverb both made clean repeats about 11% apart; Reverb became a diffused wash. (`hardware-feedback.md`)
 
-- **Round, don't truncate, values that recirculate.** The hall reverb's 16-bit "Vintage" tank first truncated toward zero: decay fell from 5.5 to 4.0 s, worse at 96 kHz. Rounding kept it. In tests. (`dsp.md`)
-- **Time knobs read true end to end.** The hall reverb's pre-delay of 81 ms arrived at 89.9 ms because the chorus in front adds 8 ms; subtracting it measured 81.9 ms. In tests. (`dsp.md`)
-- **Derive reverb loop gain from a target RT60, and scale lengths from the reference rate.** The hall reverb's RT60 stayed within ±0.1 s at 44.1, 48 and 96 kHz. In tests. (`dsp.md`)
+- **Round, don't truncate, values that recirculate.** The hall reverb's 16-bit "Vintage" tank first truncated toward zero: decay fell from 5.5 to 4.0 s, worse at 96 kHz. Rounding kept it. In tests. (`dsp-reverb.md`)
+- **Time knobs read true end to end.** The hall reverb's pre-delay of 81 ms arrived at 89.9 ms because the chorus in front adds 8 ms; subtracting it measured 81.9 ms. In tests. (`dsp-reverb.md`)
+- **Derive reverb loop gain from a target RT60, and scale lengths from the reference rate.** The hall reverb's RT60 stayed within ±0.1 s at 44.1, 48 and 96 kHz. In tests. (`dsp-reverb.md`)
+
+- **Research what makes a space distinct before tuning a tank.** Trance Atlantic's first underwater reverb was a darkened, warbly hall, and on a Duo it "sounded like a cave". Separate bounces, dispersion, a narrow image and a drifting inverted surface reflection made it read as water. By ear on a Duo. (`dsp-reverb.md`)
+- **Drain the lows inside a dark tank.** Long, dark tails boomed; a high-pass in the loop fixed it, and shortened the measured RT60 (10 s set point → 5.7 s). In tests and by ear. (`dsp-reverb.md`)
+- **Run band-limited sub-chains at a lower rate, and filter the upsampling.** A half-rate ocean cut CPU from 2.1× to 1.4× the hall reverb; plain linear upsampling left images that `tick_count` caught. In tests and the benchmark. (`dsp.md`)
+- **Pitch from a moving delay: up costs latency, down must stay above zero speed.** A two-octave upward swoop was heard at about +17 semitones, late; sizing dives with (r − 1) instead of (1 − 1/r) would have read backwards. In tests. (`dsp-pitch.md`)
+- **Filter before the bend.** A deep dive fell out of the following band-pass and vanished. In tests. (`dsp-pitch.md`)
+- **Don't remove a control that "does nothing" on one instrument.** A width-only filter knob did little on guitar; as a centred range shift it serves bass. On a Duo. (`dsp-envelope.md`)
 
 ## Testing
 
@@ -46,9 +55,19 @@ The incidents come from four plugins built while writing this playbook: a hall r
 - **Test faces with mod-ui's own widget code.** The digital delay's Repeat Hold footswitch "only responded once" on a Duo. Loading mod-ui's `modgui.js` and jQuery 1.9.1 in headless Chromium and clicking with a 2 px wobble reproduced it exactly. Verified on hardware and in tests. (`tools/face_click_test.py`)
 - **Compare ARM with x86 by envelope in clock-phase code.** The BBD echo's ARM builds matched each other but differed from x86 by up to 0.8 sample-for-sample after 0.5 s: ARM GCC fuses multiply-adds, so a clock tick lands one sample differently. The 100 ms envelope agreed within 0.1 dB. In tests. (`testing.md`)
 - **A test stand-in must behave like the platform.** `face_click_test.py` sent the face script a `change` for its own `set_port_value` and a fresh `event.data` every call; mod-ui does neither. A script relying on either would pass the test and fail on a unit. Fixed in 0.3.0, checked against `modgui.js`. (`modgui.md`)
+- **Envelope filters need harmonic test signals.** Pure-sine plucks left Trance Atlantic's throat test reading 200 Hz whatever the playing; harmonic plucks showed it opening from 250 to 430 Hz. In tests. (`tools/lv2test.py`, `dsp-envelope.md`)
+- **Know where a detector reads false.** `tick_count` flagged 2 ms harmonic attacks and octave-shifted partials at −90 dBFS; zero-crossing pitch tracking spiked where two paths cancelled and read silence as −800 cents. Check the input first, use 5 ms attacks, medians and longer windows for low notes. In tests. (`testing.md`, `dsp-pitch.md`)
+- **Compare floats with a tolerance and blank nodes by content.** `ttlcmp.py` failed on a custom unit (blank-node IDs differ every parse) and on a default of 80.71 (DPF writes float32: 80.7099990845). In tests. (`tools/ttlcmp.py`)
 - **Make the gate fail on purpose once.** The first "warning" check passed only because the planted bug hadn't been applied. (`testing.md`)
 
 ## Faces and controls
+
+- **Live values reach a face only through `modgui:monitoredOutputs`, and only while MOD's feedback is flowing.** Trance Atlantic's ripples showed nothing on a Duo; the 10-second websocket tally showed only `ping` and `stats`: the 1.14 `data_ready` stall, not the plugin. Releasing it brought the values. Verified on a Duo. (`modgui.md`, `known-mod-issues.md`)
+- **A faint layer times a typical meter value is invisible.** 25% art opacity × 0.3 ≈ 8%. Tune the meter mapping and the art together. On a Duo. (`modgui.md`)
+- **Pre-render readouts; don't rely on a web font.** A dafont TTF didn't render on the unit, though it loaded in a Chromium reproduction. Image strips worked first time. Verified on a Duo. (`modgui.md`)
+- **mod-ui's film widget reads horizontal strips only.** A vertical HISE knob export had to be rotated into a row. Checked in `modgui.js`. (`modgui.md`)
+- **Step buttons aren't pick buttons.** `face_click_test.py` failed Travel and Mode buttons because a step's value depends on the state; it now presses step buttons (an attribute name containing `step`) and checks every press moves. In tests. (`tools/face_click_test.py`)
+- **Ask which image is the default state.** The first build drew the buttons pressed at rest. (`modgui.md`)
 
 - **Buttons use `mod-widget="switch"`.** The default film widget drops clicks when the mouse moves slightly. (`modgui.md`)
 - **Run the face click test before blaming the device.** The BBD echo 1.0.1 was built without this playbook. On a Duo, its film-widget switches "switched once, then never back" and Tail never moved; the agent first suspected a stale cache, and its own harness clicked each control once, cleanly, so it passed. `face_click_test.py` reproduces the failure exactly: the 2 px wobble drops the click. Verified on a Duo and in tests. (`modgui.md`)

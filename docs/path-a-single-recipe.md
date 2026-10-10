@@ -41,6 +41,8 @@ Renaming the template: the folder names, `NAME` in the plugin Makefile, the clas
 
 A face adds roughly 200–300 KB (background JPEG, knob strip as a 256-colour PNG, screenshot, thumbnail). Full-colour PNGs are about 4× bigger. The hall reverb's recipe with face was ~292 KB and built fine.
 
+**Stay well under 1 MB.** builder.mod.audio silently refused a 998 KB recipe: the status went from "preparing" straight to "ready", with no error and nothing to install. 888 KB and below built. Verified on the builder. A rich face (2× art, a 128-frame knob strip, several overlay layers) lands around 800 KB; past that, cut knob frames or move to path B, where the images aren't embedded in the `.mk`.
+
 ## Moving to path B later
 
 Everything in `plugins/` and `bundle/` carries over unchanged. Add the top-level `Makefile`, the package file, and DPF as a submodule (`tools/add_dpf_submodule.sh`). See `docs/path-b-github-repo.md`. If the plugin was shared under `urn:mod-cookbook:<name>`, decide deliberately whether to keep that URI (pedalboards keep working) or start a new identity.

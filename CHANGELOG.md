@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.6.0 — 2026-10-11
+
+From Trance Atlantic (an envelope pitch swoop into an underwater reverb; Duo, MOD OS 1.14 RC):
+- **DSP split by trait, so agents read only what their effect needs.** `dsp.md` keeps the rules for every plugin; `dsp-time.md` (delay, chorus, flanger, feedback), `dsp-reverb.md`, `dsp-drive.md`, and two new ones, `dsp-envelope.md` and `dsp-pitch.md`. `effect-profile.md` maps each trait to its file; `AGENTS.md` and `ALL-IN-ONE.md` follow.
+- **New DSP:** half-rate band-limited sub-chains (with filtered upsampling); dispersion all-pass chains; draining lows in a dark tank; what makes a reverb read as underwater; pitch from a moving delay (latency up, never below zero speed down, filter before the bend); envelope followers, swell and centred range knobs.
+- **Faces:** live values via `modgui:monitoredOutputs` (rate, mapping, opacity); `bypass-light`; readouts as pre-rendered image strips (a web font failed on a Duo); horizontal strips only; mockup first.
+- **Builder:** recipes near 1 MB are silently refused (998 KB failed, 888 KB built); save every PNG as 256-colour.
+- **Known issues:** the `data_ready` stall freezes live face values too; a 10-second console tally tells it from a plugin bug.
+- **Tools:** `lv2test.py` gains `harmonic_pluck_train` and `run(..., trace=<output symbol>)` (via `PB_TRACE_PORT` in `lv2host.c`); `ttlcmp.py` compares custom units by content and floats with a tolerance; `face_click_test.py` understands step buttons.
+- **Path B:** delivering a commit as a git bundle when the agent can't push.
+- Links stamped `?v=0.6.0`.
+
 ## 0.5.0 — 2026-10-08
 
 - **Path B: DPF as a git submodule, no more vendoring.** The package `.mk` fetches submodules with mod-plugin-builder's `MOD_PLUGIN_BUILDER_DOWNLOAD_WITH_SUBMODULES` hook, as MOD's own packages do (26 of them, including Wasted Audio's `wstd-dlay`). Verified on builder.mod.audio with `tests/submodule-test.mk`. `tools/vendor_dpf.sh` is replaced by `tools/add_dpf_submodule.sh`; the template package `.mk`, the CI workflow (`submodules: recursive`) and `package_harness.mk` follow. Migration steps for older repos in `path-b-github-repo.md`. Prompted by a plugin developer on the MOD forum.
