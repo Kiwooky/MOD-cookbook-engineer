@@ -10,6 +10,7 @@ From Trance Atlantic (an envelope pitch swoop into an underwater reverb; Duo, MO
 - **Known issues:** the `data_ready` stall freezes live face values too; a 10-second console tally tells it from a plugin bug.
 - **Tools:** `lv2test.py` gains `harmonic_pluck_train` and `run(..., trace=<output symbol>)` (via `PB_TRACE_PORT` in `lv2host.c`); `ttlcmp.py` compares custom units by content and floats with a tolerance; `face_click_test.py` understands step buttons.
 - **Path B:** delivering a commit as a git bundle when the agent can't push.
+- **Harvesting:** `docs/harvesting.md` now routes each kind of lesson to its trait file, sets the token rules (merge, don't append; one or two sentences; nothing plugin-specific), and has a prompt that harvests a session straight into a local clone.
 - Links stamped `?v=0.6.0`.
 
 ## 0.5.0 — 2026-10-08
