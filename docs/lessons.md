@@ -18,6 +18,7 @@ The incidents come from five plugins built while writing this playbook: a hall r
 - **An agent without push access can still deliver a commit:** a git bundle copied into the person's clone, fetched and fast-forwarded there; they push. A bundle regenerated under the same name in the same batch arrived as the old copy: use a new name. Verified. (`path-b-github-repo.md`)
 - **GitHub's web uploader takes 100 files and can't add submodules.** The digital delay's first push went through GitHub Desktop, and dragging the folder in Finder left the hidden `.gitignore` behind. Verified. (`path-b-github-repo.md`)
 - **`scp` from a recent Mac needs `-O` to reach a MOD.** Fetching the BBD echo's presets failed with "subsystem request failed on channel 0": macOS `scp` now uses SFTP, which the MOD doesn't serve. Verified. (`presets.md`)
+- **Look for deletions before committing.** The oil-can delay's TTL files vanished when a folder was replaced in Finder from a zip; the pinned build failed until they were restored from history. Verified in git history. (`path-b-github-repo.md`)
 - **The agent can find the commit hash itself:** `git ls-remote https://github.com/<owner>/<repo>` works on a public repo without credentials. Verified. (`path-b-github-repo.md`)
 
 ## DSP and sound
@@ -57,7 +58,7 @@ The incidents come from five plugins built while writing this playbook: a hall r
 - **A test stand-in must behave like the platform.** `face_click_test.py` sent the face script a `change` for its own `set_port_value` and a fresh `event.data` every call; mod-ui does neither. A script relying on either would pass the test and fail on a unit. Fixed in 0.3.0, checked against `modgui.js`. (`modgui.md`)
 - **Envelope filters need harmonic test signals.** Pure-sine plucks left Trance Atlantic's throat test reading 200 Hz whatever the playing; harmonic plucks showed it opening from 250 to 430 Hz. In tests. (`tools/lv2test.py`, `dsp-envelope.md`)
 - **Know where a detector reads false.** `tick_count` flagged 2 ms harmonic attacks and octave-shifted partials at −90 dBFS; zero-crossing pitch tracking spiked where two paths cancelled and read silence as −800 cents. Check the input first, use 5 ms attacks, medians and longer windows for low notes. In tests. (`testing.md`, `dsp-pitch.md`)
-- **Compare floats with a tolerance and blank nodes by content.** `ttlcmp.py` failed on a custom unit (blank-node IDs differ every parse) and on a default of 80.71 (DPF writes float32: 80.7099990845). In tests. (`tools/ttlcmp.py`)
+- **Compare floats with a tolerance, blank nodes by content, and a custom unit with DPF's stock unit by symbol.** `ttlcmp.py` failed on a custom unit (blank-node IDs differ every parse), on a default of 80.71 (DPF writes float32: 80.7099990845), and on the oil-can delay's `%.0fms` display format against DPF's `units:ms`. In tests. (`tools/ttlcmp.py`)
 - **Make the gate fail on purpose once.** The first "warning" check passed only because the planted bug hadn't been applied. (`testing.md`)
 
 ## Faces and controls
@@ -67,6 +68,13 @@ The incidents come from five plugins built while writing this playbook: a hall r
 - **Pre-render readouts; don't rely on a web font.** A dafont TTF didn't render on the unit, though it loaded in a Chromium reproduction. Image strips worked first time. Verified on a Duo. (`modgui.md`)
 - **mod-ui's film widget reads horizontal strips only.** A vertical HISE knob export had to be rotated into a row. Checked in `modgui.js`. (`modgui.md`)
 - **Step buttons aren't pick buttons.** `face_click_test.py` failed Travel and Mode buttons because a step's value depends on the state; it now presses step buttons (an attribute name containing `step`) and checks every press moves. In tests. (`tools/face_click_test.py`)
+- **Tempo sync is one TTL property; check the platform before adding ports.** Asked for BPM time entry, the oil-can delay's first plan was extra settings ports; `mod:tempoRelatedDynamicScalePoints` gives mod-ui's own Tempo + note value. Source-checked. (`lv2-and-mod-rules.md`)
+- **Tap tempo can only be the pedalboard's.** mod-ui offers footswitch tap-tempo only on the global `:bpm` port; a plugin Tap control would leave the Time knob showing the wrong time. Source-checked. (`lv2-and-mod-rules.md`)
+- **Type into a script-drawn `<input>`, not mod-ui's `input-control-value`.** The oil-can delay's readouts showed values but took no typing on a Duo. Failure verified on a Duo; fix in tests. (`modgui.md`)
+- **Give a 2× strip's `background-size` an explicit height.** mod-ui counts frames from that height; without it, a 2× strip reads double the frames. Source-checked. (`modgui.md`)
+- **Sliders are invisible film strips plus a script.** The oil-can delay's Disc Size slider scales a can from 140 to 280 px; 201 frames gives 1 px per step of mod-ui's drag. In tests. (`modgui.md`)
+- **One strip for a button and its LED.** The oil-can delay's four switches light their LEDs with no script. In tests. (`modgui.md`)
+- **Ship the designer's background JPEG untouched.** A re-saved panel smeared the oil-can delay's logo. By eye. (`modgui.md`)
 - **Ask which image is the default state.** The first build drew the buttons pressed at rest. (`modgui.md`)
 
 - **Buttons use `mod-widget="switch"`.** The default film widget drops clicks when the mouse moves slightly. (`modgui.md`)
@@ -104,3 +112,8 @@ The incidents come from five plugins built while writing this playbook: a hall r
 - **Read a scanned schematic from the PDF's embedded image at its native resolution.** Rasterising the BBD echo's 150 dpi scan at 300 dpi added nothing; cropping and zooming the embedded image read the resistor values.
 - **Don't infer from another plugin's untested path.** "The hall reverb's toggles work, so the film widget is fine" was wrong: they default to on and probably were never switched off on a unit.
 - **Ask what the original did before you "fix" it.** Tails, Mix on Output 1, Output 2's polarity and the bypass all had answers only the owner had. Mark each schematic reading *confident*, *approximate* or *guess*, and let the owner overrule.
+
+## Working with the person
+
+- **Images go as files, both ways.** A 2× knob strip pasted into chat arrived as 62×8000 without alpha; a folder-structured zip sent back deleted files when unpacked over the repo. (`process.md`)
+- **Work in the person's clone when you can reach it.** Only reading the oil-can delay's clone showed its missing TTL files; sandbox copies drift. (`process.md`)

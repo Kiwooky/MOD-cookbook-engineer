@@ -4,7 +4,7 @@ What MOD's hosts expect, including the parts nobody documents. Verified on a MOD
 
 ## TTL: hand-written, checked against DPF
 
-DPF's `lv2_ttl_generator` can't run on the ARM cross-build, so the TTL is written by hand. `tools/check.sh` builds natively, runs the generator and compares (`tools/ttlcmp.py`). Expected differences are only audio port names/symbols and `mod:preferMomentaryOnByDefault`.
+DPF's `lv2_ttl_generator` can't run on the ARM cross-build, so the TTL is written by hand. `tools/check.sh` builds natively, runs the generator and compares (`tools/ttlcmp.py`). Expected differences are only audio port names/symbols, `mod:preferMomentaryOnByDefault` and `mod:tempoRelatedDynamicScalePoints`.
 
 - **Port order:** audio inputs, audio outputs, then controls in enum order; indices sequential from 0. `kParameterCount` equals the number of control ports.
 - **Counts match** across `DISTRHO_PLUGIN_NUM_INPUTS/OUTPUTS`, the TTL and `run()`.
@@ -20,8 +20,10 @@ lv2:extensionData <http://lv2plug.in/ns/ext/options#interface> ;
 ```
 
 - **Logarithmic knobs** (`pprops:logarithmic` + DPF `kParameterIsLogarithmic`) for time and frequency. mod-ui maps their position on a log scale.
+- **Tempo sync is one property.** `mod:tempoRelatedDynamicScalePoints` on a port whose unit symbol is `ms`, `s`, `min`, `Hz`, `kHz`, `MHz` or `BPM` (a custom unit counts) makes mod-ui offer **Tempo** + a note value in that control's addressing dialog and set it from the pedalboard BPM. Leave out `mod:hasStrictBounds` unless every note value fits the range at 20–280 BPM: on a 40–2000 ms Time it hides even 1/4. Source-checked (mod-ui `tempo.js`, `hardware.js`); not yet tried on a unit.
+- **Tap tempo is the pedalboard's, not the plugin's.** mod-ui offers the footswitch tap-tempo mode only on the global `:bpm` port; a plugin's time follows taps through tempo sync. Don't add a plugin-side Tap trigger: a plugin can't move its own input port, so the knob and readout would show a time that isn't playing. Source-checked.
 - **Enumerations** (`lv2:enumeration` + `lv2:scalePoint`, DPF `enumValues`) for switches with labelled positions.
-- **Units DPF doesn't know** (`dB`, `Hz`, `kHz`, `ms`, `s` and `%` are mapped) become a custom unit: `units:unit [ a units:Unit ; rdfs:label "st" ; units:symbol "st" ; units:render "%f st" ]`. MOD shows `%f` with six decimals; make the port integer (`kParameterIsInteger`, `lv2:integer`) and the render is `%d st`. Copy DPF's form exactly (`tools/ttlcmp.py` compares it).
+- **Units DPF doesn't know** (`dB`, `Hz`, `kHz`, `ms`, `s` and `%` are mapped) become a custom unit: `units:unit [ a units:Unit ; rdfs:label "st" ; units:symbol "st" ; units:render "%f st" ]`. MOD shows `%f` with six decimals; make the port integer (`kParameterIsInteger`, `lv2:integer`) and the render is `%d st`. Copy DPF's form exactly (`tools/ttlcmp.py` compares it). A mapped unit can also be written as a custom unit with the same symbol, just to set a display format (`units:render "%.0fms"`); `ttlcmp.py` accepts that, and tempo sync still sees the symbol.
 
 ## Bypass in the plugin
 

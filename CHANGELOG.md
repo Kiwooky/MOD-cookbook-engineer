@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.7.0 — 2026-10-12
+
+From the oil-can delay's face and tempo work (1.0.5–1.0.9):
+- **Tempo:** `mod:tempoRelatedDynamicScalePoints` gives a time control mod-ui's Tempo + note value sync; skip `mod:hasStrictBounds` on wide ranges; tap tempo comes only through the pedalboard BPM (`lv2-and-mod-rules.md`). `tools/ttlcmp.py` ignores the property, which DPF can't write, and now matches a custom unit (a display format like `%.0fms`) to DPF's stock unit with the same symbol.
+- **Faces:** typed readouts as a script-drawn `<input>` (mod-ui's `input-control-value` took no typing on a Duo); 2× strips need an explicit `background-size` height; sliders as invisible film strips plus a script; button + LED in one strip; ship the designer's JPEG untouched (`modgui.md`).
+- **Repos and ways of working:** look for deletions before committing (a Finder folder replace lost the TTLs); move images as files both ways; work in the person's clone (`path-b-github-repo.md`, `process.md`).
+- Links stamped `?v=0.7.0`.
+
 ## 0.6.0 — 2026-10-11
 
 From Trance Atlantic (an envelope pitch swoop into an underwater reverb; Duo, MOD OS 1.14 RC):

@@ -22,5 +22,7 @@ The same stages for both paths. Each ends with something checkable. Skipping one
 - **Report numbers, not adjectives:** "peaks at −2.4 dBFS", "4.5 cents RMS", "1.2× the reference plugin's CPU".
 - **Say what wasn't verified.** No test can tell you whether it's musical; ask.
 - **Run dependent steps in order.** Render the face after rebuilding the bundle; save or upload a file after the edit that changes it has finished, not in parallel with it.
+- **Move images as files, not chat pastes.** A 2× knob strip pasted into chat arrived shrunk to 62×8000 without its alpha; ask for big images as loose attachments or a zip. Going back, send images loose with a note of the folder each goes in, never a folder-structured zip to unpack over the repo (see path B: it deleted files).
+- **Work in the person's clone when you can reach it.** Compare its `git log` with origin, edit there, and let them commit; a sandbox copy or an old zip drifts. Reading the oil-can delay's clone was what showed its TTL files missing.
 - **Tell people where files land** and give exact clicks or commands for their tools (GitHub Desktop, Finder, Terminal).
 - **Keep the docs honest as you go:** spec, CHANGELOG and README change in the same step as the code.

@@ -24,7 +24,9 @@ Prefix every selector with `.yourclass{{{cns}}}`; load images as `url(/resources
 **Filmstrips** (one horizontal row, frame 0 = minimum; mod-ui reads horizontal strips only, so convert vertical exports such as HISE's; checked in `modgui.js`):
 - frames = strip width ÷ **element width** (frames needn't be square)
 - frame shown = round((value − min)/(max − min) × steps), on a log scale for logarithmic ports
-- the same strip can be drawn smaller with `background-size: auto <h>px` (trim pots, or 2× strips on retina)
+- the same strip can be drawn smaller with `background-size: auto <h>px` (trim pots, or 2× strips on retina). **Always give the height:** mod-ui counts frames as CSS height × image width ÷ (element width × image height), and a single-value `background-size` falls back to the image's own height, doubling the frame count of a 2× strip (source-checked in `modgui.js`)
+- **A button and its LED can be one strip** (`[off | on]` frames) on a `mod-widget="switch"` element covering both: the LED follows with no script. In tests.
+- **Sliders, and art that follows a control:** an invisible film strip (transparent PNG, 201 frames) is the drag zone, and the face script moves the cap and scales or swaps art on `change`. mod-ui drags at ⌈100 ÷ (frames ÷ 2)⌉ px per step vertically (half that rate sideways), so 201 frames = 1 px a step, 200 px for the range; match the cap's travel to it. Source-checked and tested with mod-ui's code; not yet confirmed on a unit.
 
 ## Script (optional)
 
@@ -47,6 +49,8 @@ Prefix every selector with `.yourclass{{{cns}}}`; load images as `url(/resources
 - **Test the output offline:** `Plugin.run(..., trace='<symbol>')` in `tools/lv2test.py` returns its value per block.
 
 ## Readouts
+
+**Typed values: draw the readout in the script, with a real `<input>`.** mod-ui's own `mod-role="input-control-value"` showed values but wouldn't take typing on a Duo (the oil-can delay 1.0.6). The script opens an `<input>` on click: Enter or a press anywhere else applies (listen for `mousedown`/`touchstart`/`pointerdown` in the capture phase, since knobs swallow them), Esc cancels, a `change` from elsewhere closes it, and the value is clamped and set with `funcs.set_port_value`. Use `inputmode="text"` if it accepts units (`120bpm`, `1.2s`); a decimal pad has no letters. In tests; not yet confirmed on a unit.
 
 **Pre-render text as image strips; don't load a web font.** A free TTF loaded with `@font-face` from the face's resources didn't render on a Duo (it loaded fine when mod-ui's loading was reproduced in Chromium; cause unknown). One frame per value (`#00`–`#24`, `OFF`/`FIX`/`ENV`), picked by the script with `background-position`, works in every browser. Render the strip from the font with Pillow (`ImageDraw.text(..., anchor='mm')`), 2× size, saved as a 256-colour PNG. Verified on a Duo.
 
@@ -128,5 +132,6 @@ The designer supplies: a background with **black placeholder holes** where contr
 - Fit control positions to the centres of the holes. **If the designer sent a mockup, fit by template matching:** composite each sprite onto the background at candidate positions near the hole and keep the one with the least pixel error against the mockup. The BBD echo: zero error for every button and switch.
 - **Output jacks can sit on printed legends.** mod-ui draws each jack 56 px tall with a 13 px gap (69 px pitch), starting at the `.mod-pedal-output` element's `top`. Set that `top`, and change the pitch with `.mod-pedal.<yourclass>{{{cns}}} .mod-pedal-output .mod-audio-output { margin-bottom: … }`. The BBD echo's jacks sit on its MIX and 100% WET arrows (rendered with mod-ui's CSS rules; not yet seen on a unit).
 - **When the art names a control differently, change port names and scale-point labels, never symbols.** The BBD echo's face says REVERB where the ports said "Hall": the unit's screen now matches the art and saved settings still load.
+- **Ship the designer's background JPEG untouched** if it's already a reasonable size; re-encoding smeared fine lettering (a logo). By eye.
 - Budget: background JPEG q88, strips as 256-colour PNGs; a whole face of about 200 KB is typical. **Save every PNG as 256-colour**, including layers you edit later: one re-saved as full RGBA grew from 41 KB to 157 KB and pushed a recipe past the builder's limit (`path-a-single-recipe.md`).
 - **Mockup first.** Before the real face, build an interactive HTML page with the real art and the script's logic (knobs, buttons, lights, readouts, a simulated meter) and let the designer sign it off. Find each control's position by diffing the mockup against the empty background (connected components of the changed pixels). Trance Atlantic's face moved from the mockup to modgui almost unchanged; check fine positions by overlaying a crop (a half-pixel slip put two lights out of their housings).

@@ -6,14 +6,22 @@
 Compares every port (index, symbol, name, ranges, units, properties,
 designation) and the plugin version. Audio port names and symbols differ by
 design (DPF writes lv2_audio_in_1 ...) and are ignored. Also ignored:
-mod:preferMomentaryOnByDefault, which DPF can't express. Exit code 1 on any
+mod:preferMomentaryOnByDefault and mod:tempoRelatedDynamicScalePoints,
+which DPF can't express. A custom unit (written to set a display format, e.g.
+units:render "%.0fms") matches the stock unit DPF writes if the symbols agree.
+Exit code 1 on any
 other difference. Needs: pip install rdflib
 """
 import sys
 import rdflib
 
 L = rdflib.Namespace('http://lv2plug.in/ns/lv2core#')
-IGNORE_PROPS = {'http://moddevices.com/ns/mod#preferMomentaryOnByDefault'}
+IGNORE_PROPS = {'http://moddevices.com/ns/mod#preferMomentaryOnByDefault',
+                'http://moddevices.com/ns/mod#tempoRelatedDynamicScalePoints'}  # DPF can't write either
+U = 'http://lv2plug.in/ns/extensions/units#'
+# stock unit -> its symbol, so a custom unit with the same symbol matches it
+STOCK = {'ms': 'ms', 's': 's', 'min': 'min', 'hz': 'Hz', 'khz': 'kHz', 'mhz': 'MHz', 'db': 'dB', 'pc': '%',
+         'bpm': 'BPM', 'cent': 'ct', 'semitone12TET': 'semi', 'oct': 'oct', 'midiNote': 'note', 'coef': ''}
 
 
 def node(g, o):
@@ -21,6 +29,17 @@ def node(g, o):
     if isinstance(o, rdflib.BNode):
         return '[' + '; '.join(sorted('%s %s' % (str(k).split('#')[-1], node(g, v)) for k, v in g.predicate_objects(o))) + ']'
     return str(o)
+
+
+def unit_symbol(v):
+    """'ms' for units:ms or for a custom unit whose units:symbol is 'ms'."""
+    if v.startswith(U):
+        return STOCK.get(v[len(U):])
+    if v.startswith('['):
+        for part in v.strip('[]').split('; '):
+            if part.startswith('symbol '):
+                return part[len('symbol '):]
+    return None
 
 
 def load(f):
@@ -59,6 +78,9 @@ for i in sorted(set(a) | set(b)):
         x, y = da.get(k), dh.get(k)
         if x == y:
             continue
+        if k == 'unit' and x and y and len(x) == len(y) == 1 and unit_symbol(x[0]) is not None \
+                and unit_symbol(x[0]) == unit_symbol(y[0]):
+            continue   # stock unit vs custom unit with the same symbol
         try:
             # float32 in DPF vs decimal by hand: 80.71 is written 80.7099990845
             if x and y and len(x) == len(y) and all(abs(float(p) - float(q)) <= 1e-5 * max(1.0, abs(float(q))) for p, q in zip(x, y)):
