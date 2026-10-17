@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.7.1 — 2026-10-17
+
+From Trance Atlantic 2.6–2.7:
+- **Port groups:** how MOD orders the settings panel (group `lv2:index`, then port index; port index alone on older OS), and why every control should be grouped. Renumbering ports is safe on MOD. `ttlcmp.py` now compares port groups.
+- **Faces:** keep fading layers composited (`will-change: opacity`), or the whole pedal flickers with live values.
+- Links stamped `?v=0.7.1`.
+
 ## 0.7.0 — 2026-10-12
 
 From the oil-can delay's face and tempo work (1.0.5–1.0.9):

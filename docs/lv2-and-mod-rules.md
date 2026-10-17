@@ -52,7 +52,11 @@ Two jobs, one number. On every path it's a **cache-buster**; on path B it's also
 
 ## Ports are forever (once shared)
 
-Saved pedalboards store port symbols and values. After anyone else has the plugin, never remove, reorder or rename ports or change the URI. Before that, change freely, but tell the tester to re-add the plugin to their pedalboard.
+Saved pedalboards store port symbols and values. After anyone else has the plugin, never remove or rename ports or change the URI. Renumbering (`lv2:index`) is safe on MOD, which saves pedalboards, presets and assignments by symbol; hosts that save by index would not be, so do it before a store release. Before that, change freely, but tell the tester to re-add the plugin to their pedalboard.
+
+## Port groups and panel order
+
+MOD's settings panel lists groups by the group's `lv2:index`, then each group's ports by port index; without groups (an older OS) it's port index alone. So **number the ports in the order you want them shown, and group every input control** (a mix of grouped and ungrouped ports sorts unpredictably). Groups: `pg:group <URI#portGroup_x>` on each port, and per group `a pg:InputGroup ; lv2:index n ; lv2:name ; lv2:symbol`. DPF writes the groups from `Parameter::groupId` + `initPortGroup()` but not `lv2:index`, and without it MOD sorts groups alphabetically: add it by hand (`ttlcmp.py` allows it). Verified with mod-ui's own plugin-info code.
 
 ## Factory presets
 

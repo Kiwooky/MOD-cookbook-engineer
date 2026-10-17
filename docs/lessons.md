@@ -86,6 +86,8 @@ The incidents come from five plugins built while writing this playbook: a hall r
 - **Fit control positions to the designer's mockup by template matching.** Zero pixel error for every button and switch on the BBD echo. In tests. (`modgui.md`)
 - **Latching unless asked.** Hold was copied with `mod:preferMomentaryOnByDefault` from another plugin's switch; the player wanted latching. (`lv2-and-mod-rules.md`)
 - **The bypass widget's classes are inverted** (`on` = bypassed). (`modgui.md`)
+- **Pin fading layers to the compositor.** Two faces' orbs made the whole pedal flicker in brightness as the input level faded them; `will-change: opacity` on each layer fixed both on a Duo. (`modgui.md`)
+- **Port order is the panel order.** Grouping Trance Atlantic's controls only labels them; MOD sorts by group `lv2:index` (DPF doesn't write it, so groups fell back to alphabetical) and then port index, which is also the order without group support. Renumbered the ports to match; checked with mod-ui's plugin-info code. (`lv2-and-mod-rules.md`)
 - **A multi-position switch drawn as a film only steps forward and wraps.** The digital delay's range lever went 2 s → 16 ms → 250 ms whichever legend line was clicked (hardware). Fix: transparent click zones over each position that call `funcs.set_port_value` from the face script; the film still draws the lever. Fix verified with mod-ui's code in tests. (`modgui.md`)
 - **Render the screenshot after rebuilding the bundle.** The digital delay's first re-render after a new background read the old one from the build output. (`modgui.md`)
 

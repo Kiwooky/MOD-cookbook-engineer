@@ -9,8 +9,9 @@ design (DPF writes lv2_audio_in_1 ...) and are ignored. Also ignored:
 mod:preferMomentaryOnByDefault and mod:tempoRelatedDynamicScalePoints,
 which DPF can't express. A custom unit (written to set a display format, e.g.
 units:render "%.0fms") matches the stock unit DPF writes if the symbols agree.
-Exit code 1 on any
-other difference. Needs: pip install rdflib
+Port groups compare by name and symbol; a group's lv2:index is hand-only (DPF
+can't write it, and MOD needs it to order groups), so it is ignored.
+Exit code 1 on any other difference. Needs: pip install rdflib
 """
 import sys
 import rdflib
@@ -62,11 +63,15 @@ def load(f):
     for k in ('minorVersion', 'microVersion'):
         for s, _, o in g.triples((None, L[k], None)):
             ver[k] = str(o)
-    return ports, audio, ver
+    groups = {}
+    PG = rdflib.Namespace('http://lv2plug.in/ns/ext/port-groups#')
+    for gr in set(g.objects(None, PG['group'])):
+        groups[str(gr)] = (str(g.value(gr, L['name'])), str(g.value(gr, L['symbol'])))
+    return ports, audio, ver, groups
 
 
-a, audio, va = load(sys.argv[1])
-b, _, vb = load(sys.argv[2])
+a, audio, va, ga = load(sys.argv[1])
+b, _, vb, gb = load(sys.argv[2])
 bad = 0
 if len(a) != len(b):
     print('port count differs: DPF %d, hand %d' % (len(a), len(b))); bad += 1
@@ -88,9 +93,12 @@ for i in sorted(set(a) | set(b)):
         except ValueError:
             pass
         print('port %d %s: DPF %s, hand %s' % (i, k, x, y)); bad += 1
+for k in sorted(set(ga) | set(gb)):
+    if ga.get(k) != gb.get(k):
+        print('group %s: DPF %s, hand %s' % (k.split('#')[-1], ga.get(k), gb.get(k))); bad += 1
 for k in ('minorVersion', 'microVersion'):
     if va.get(k) != vb.get(k):
         print('%s: DPF %s, hand %s' % (k, va.get(k), vb.get(k))); bad += 1
-print('TTL matches DPF (%d ports, version %s.%s)' % (len(a), vb.get('minorVersion'), vb.get('microVersion')) if not bad
+print('TTL matches DPF (%d ports, %d groups, version %s.%s)' % (len(a), len(gb), vb.get('minorVersion'), vb.get('microVersion')) if not bad
       else '%d difference(s)' % bad)
 sys.exit(1 if bad else 0)
