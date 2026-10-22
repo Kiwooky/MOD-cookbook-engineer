@@ -27,20 +27,27 @@ _passes = 0
 
 
 class Plugin:
-    def __init__(self, order, defaults, n_in=1, n_out=1, so=None, host=None):
+    def __init__(self, order, defaults, n_in=1, n_out=1, so=None, host=None, atom_in=0, atom_out=0):
+        """atom_in / atom_out: the event ports DPF adds after the audio ports (1 each for
+        DISTRHO_PLUGIN_WANT_TIMEPOS and DISTRHO_PLUGIN_WANT_MIDI_OUTPUT); controls follow them."""
         self.order = list(order)
         self.defaults = dict(defaults)
-        self.port = {k: n_in + n_out + i for i, k in enumerate(self.order)}
+        self.port = {k: n_in + n_out + atom_in + atom_out + i for i, k in enumerate(self.order)}
         self.n_in, self.n_out = n_in, n_out
+        self.atom_in, self.atom_out = atom_in, atom_out
+        self.midi = np.zeros((0, 4), np.int32)
         self.so = so or os.environ.get('PB_SO')
         self.host = (host or os.environ.get('PB_HOST', 'tools/lv2host')).split()
         if not self.so:
             sys.exit('set PB_SO to the plugin .so (tools/check.sh does this)')
 
-    def run(self, x, sr=48000, events=(), trace=None, **controls):
+    def run(self, x, sr=48000, events=(), trace=None, transport=None, **controls):
         """x: (frames,) or (frames, n_in). events: [(sample, symbol, value), ...]
         trace: an output control port's symbol (listed in `order`); then returns
-        (audio, values), with the port's value after every 256-frame block."""
+        (audio, values), with the port's value after every 256-frame block.
+        transport: dict(bpm=120, bpb=4, roll=(start, stop or None), every=False) for a plugin
+        with an atom input. MIDI from an atom output lands in self.midi, rows of
+        (absolute frame, status, data1, data2)."""
         unknown = set(controls) - set(self.order)
         if unknown:
             raise KeyError('unknown control(s): %s' % ', '.join(sorted(unknown)))
@@ -54,11 +61,24 @@ class Plugin:
             args = self.host + [self.so, fi, fo, str(sr), str(self.n_in), str(self.n_out)]
             args += ['%g' % c[k] for k in self.order]
             args += ['@%d:%d=%g' % (s, self.port[k], v) for s, k, v in events]
-            env = None
+            env = dict(os.environ)
             if trace:
                 ft = os.path.join(d, 't.raw')
-                env = dict(os.environ, PB_TRACE_PORT=str(self.port[trace]), PB_TRACE_FILE=ft)
+                env.update(PB_TRACE_PORT=str(self.port[trace]), PB_TRACE_FILE=ft)
+            if self.atom_in:
+                env['PB_ATOM_IN'] = str(self.atom_in)
+                if transport:
+                    env['PB_BPM'] = '%g' % transport.get('bpm', 120)
+                    env['PB_BPB'] = '%g' % transport.get('bpb', 4)
+                    a, b = transport.get('roll', (0, None))
+                    env['PB_ROLL'] = '%d:%d' % (a, -1 if b is None else b)
+                    env['PB_POS_EVERY'] = '1' if transport.get('every') else '0'
+            fm = os.path.join(d, 'm.raw')
+            if self.atom_out:
+                env.update(PB_ATOM_OUT=str(self.atom_out), PB_MIDI_FILE=fm)
             subprocess.run(args, check=True, stdout=subprocess.DEVNULL, env=env)
+            if self.atom_out:
+                self.midi = np.fromfile(fm, np.int32).reshape(-1, 4) if os.path.exists(fm) else np.zeros((0, 4), np.int32)
             y = np.fromfile(fo, np.float32).reshape(-1, self.n_out)
             if trace:
                 return y, np.fromfile(ft, np.float32)
