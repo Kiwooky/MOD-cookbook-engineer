@@ -23,6 +23,7 @@ Prefix every selector with `.yourclass{{{cns}}}`; load images as `url(/resources
 
 **Filmstrips** (one horizontal row, frame 0 = minimum; mod-ui reads horizontal strips only, so convert vertical exports such as HISE's; checked in `modgui.js`):
 - frames = strip width ÷ **element width** (frames needn't be square)
+- **Size film elements in whole pixels.** mod-ui takes the height with `parseInt` and rounds the width when it counts frames, so a 63.5 px knob drifted across frames as it turned; 64 px (and a strip width that's a whole multiple) fixed it. Source-checked in `modgui.js`, seen in renders (Tapestry).
 - frame shown = round((value − min)/(max − min) × steps), on a log scale for logarithmic ports
 - the same strip can be drawn smaller with `background-size: auto <h>px` (trim pots, or 2× strips on retina). **Always give the height:** mod-ui counts frames as CSS height × image width ÷ (element width × image height), and a single-value `background-size` falls back to the image's own height, doubling the frame count of a 2× strip (source-checked in `modgui.js`)
 - **A button and its LED can be one strip** (`[off | on]` frames) on a `mod-widget="switch"` element covering both: the LED follows with no script. In tests.
@@ -53,7 +54,9 @@ Prefix every selector with `.yourclass{{{cns}}}`; load images as `url(/resources
 
 **Typed values: draw the readout in the script, with a real `<input>`.** mod-ui's own `mod-role="input-control-value"` showed values but wouldn't take typing on a Duo (the oil-can delay 1.0.6). The script opens an `<input>` on click: Enter or a press anywhere else applies (listen for `mousedown`/`touchstart`/`pointerdown` in the capture phase, since knobs swallow them), Esc cancels, a `change` from elsewhere closes it, and the value is clamped and set with `funcs.set_port_value`. Use `inputmode="text"` if it accepts units (`120bpm`, `1.2s`); a decimal pad has no letters. In tests; not yet confirmed on a unit.
 
-**Pre-render text as image strips; don't load a web font.** A free TTF loaded with `@font-face` from the face's resources didn't render on a Duo (it loaded fine when mod-ui's loading was reproduced in Chromium; cause unknown). One frame per value (`#00`–`#24`, `OFF`/`FIX`/`ENV`), picked by the script with `background-position`, works in every browser. Render the strip from the font with Pillow (`ImageDraw.text(..., anchor='mm')`), 2× size, saved as a 256-colour PNG. Verified on a Duo.
+**Web fonts work, with `!important`.** mod-ui's `main.css` sets `* { font-family: "cooper hewitt" !important }`, which beats any face rule without `!important`; that's why a font loaded with `@font-face` "didn't render" on a Duo. Load it as `url(/resources/<file>.woff2{{{ns}}})` and set `font-family: 'MyFont', monospace !important`. Check the font has every character the readout prints (Tapestry's LCD font had no `-`, `+` or `.`, so those fell back to the system font): add the glyphs (fontTools) or pick another font. Verified on a Duo (Tapestry 1.0.x).
+
+**Or pre-render text as image strips,** when the font's licence doesn't allow embedding or the readout is a handful of fixed words. One frame per value (`#00`–`#24`, `OFF`/`FIX`/`ENV`), picked by the script with `background-position`, works in every browser. Render the strip from the font with Pillow (`ImageDraw.text(..., anchor='mm')`), 2× size, saved as a 256-colour PNG. Verified on a Duo.
 
 ## Testing a face
 

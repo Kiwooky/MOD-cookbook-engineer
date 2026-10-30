@@ -24,7 +24,7 @@ Renaming the template: the folder names, `NAME` in the plugin Makefile, the clas
 
 ## Anatomy of the generated recipe
 
-- `<P>_VERSION / _SITE / _SITE_METHOD = git`: DPF at the pinned commit `61d38eb6…`.
+- `<P>_VERSION / _SITE / _SITE_METHOD = git`: DPF at the pinned commit `61d38eb6…`. **That hash is DPF's, not your repo's: never change it.** Tapestry's recipe got its own repo's commit pasted in (as a path-B package file wants) and the build failed. Verified on the builder.
 - **Sources** (C++, header, Makefile): `define` blocks, `export`ed, written with `printf '%s\n' "$$VAR"` in CONFIGURE into `$(@D)/examples/<name>/` (the cookbook pattern; proven on the builder).
 - **BUILD:** `$(TARGET_MAKE_ENV) $(TARGET_CONFIGURE_OPTS) $(MAKE) NOOPT=true -C $(@D)/examples/<name> lv2_dsp`.
 - **INSTALL:** copies `<name>_dsp.so`, then writes every bundle file (TTLs, face HTML/CSS/JS, images) with make's `$(file >path,$(VAR))`, decoding images from base64.
@@ -41,8 +41,10 @@ Renaming the template: the folder names, `NAME` in the plugin Makefile, the clas
 
 A face adds roughly 200–300 KB (background JPEG, knob strip as a 256-colour PNG, screenshot, thumbnail). Full-colour PNGs are about 4× bigger. The hall reverb's recipe with face was ~292 KB and built fine.
 
-**Stay well under 1 MB.** builder.mod.audio silently refused a 998 KB recipe: the status went from "preparing" straight to "ready", with no error and nothing to install. 888 KB and below built. Verified on the builder. A rich face (2× art, a 128-frame knob strip, several overlay layers) lands around 800 KB; past that, cut knob frames or move to path B, where the images aren't embedded in the `.mk`.
+**Stay well under 1 MB; aim for 850 KB.** builder.mod.audio silently refused a 998 KB recipe: the status went from "preparing" straight to "ready", with no error and nothing to install. 888 KB and below built (verified on the builder); Tapestry's seemed to fail around 900 KB (believed). A rich face (2× art, a 128-frame knob strip, several overlay layers) lands around 800 KB; past that, cut knob frames or move to path B, where the images aren't embedded in the `.mk`.
 
 ## Moving to path B later
+
+**Move once the plugin has a GitHub repo.** A repo that also commits single-file recipes has two sources of truth, and their two kinds of hash line get mixed up (above). Path A is for prototypes not on GitHub yet.
 
 Everything in `plugins/` and `bundle/` carries over unchanged. Add the top-level `Makefile`, the package file, and DPF as a submodule (`tools/add_dpf_submodule.sh`). See `docs/path-b-github-repo.md`. If the plugin was shared under `urn:mod-cookbook:<name>`, decide deliberately whether to keep that URI (pedalboards keep working) or start a new identity.

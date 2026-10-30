@@ -9,6 +9,7 @@ The incidents come from five plugins built while writing this playbook: a hall r
 - **Declare `opts:options` and `urid:map` as required.** The cookbook's examples omit them and only work because mod-host supplies both; strict hosts refuse the plugin. (`lv2-and-mod-rules.md`)
 - **Nothing over ~100 KB through `export`.** The hall reverb's face broke the cookbook's `export` + `printf` pattern with "Argument list too long" (128 KB environment-variable limit). Switched to `$(file)` + base64. (`path-a-single-recipe.md`)
 - **Bump the version on every upload, and ship a face from the first one.** The hall reverb kept the default "tuna can" thumbnail: the first, face-less install was cached in the browser until 2035 under that version. (`lv2-and-mod-rules.md`)
+- **A single recipe's `_VERSION` is DPF's commit.** Tapestry's had its repo commit pasted in, as a package file wants, and the build failed. Once a plugin is on GitHub, use path B only. (`path-a-single-recipe.md`)
 - **The recipe filename must match its variable prefix.** The builder rewrites the prefix internally. (`path-a-single-recipe.md`)
 - **Use DPF as a git submodule, the way MOD's own packages do.** Earlier versions vendored a copy of DPF into each repo, believing the builder couldn't fetch submodules. A plugin developer pointed out that's non-standard. mod-plugin-builder has a hook for it (`MOD_PLUGIN_BUILDER_DOWNLOAD_WITH_SUBMODULES`), used by 26 of MOD's packages; a test recipe proved builder.mod.audio runs it. Check how the platform's own packages solve a problem before working around it. Verified on builder.mod.audio. (`path-b-github-repo.md`)
 - **The package file needs the full 40-character commit hash.** (`path-b-github-repo.md`)
@@ -24,6 +25,9 @@ The incidents come from five plugins built while writing this playbook: a hall r
 ## DSP and sound
 
 - **Measure before you claim.** The oil-can delay's CPU was first predicted "well under the hall reverb"; it measured 1.25×, later 0.7× after removing the noise section, then 1.2× with oversampling. Only measurements went into the docs after that. (`dsp.md`)
+- **One Noise control, and 0 means none.** Tapestry's Hiss at 0 still rasped: tape grain, not hiss. Grain and hiss on one knob kept everyone happy. (`dsp.md`)
+- **Share the mechanism, split the noise, link the detectors** when making a mono effect stereo; keep the left on the mono seed so left = mono. (`dsp.md`)
+- **Tilt with a shelf.** A low-pass/high-pass crossfade bumped the mids. (`dsp.md`)
 - **Players want movement, not dirt.** Modelled hiss and hum were switched off within seconds in the first hardware test; the warble they made in the tails was the part worth keeping. (`dsp.md`)
 - **Test at guitar level.** Sag was tuned for hot signals and barely reacted to a guitar at about −20 dBFS. (`testing.md`)
 - **Soft-limit effects that can run away (wet path).** The oil-can delay 1.0.2's runaway peaked at +3.8 dBFS and hard-clipped at the converter: "digital ticks". (`dsp.md`, `dsp-time.md`)
@@ -60,12 +64,14 @@ The incidents come from five plugins built while writing this playbook: a hall r
 - **Know where a detector reads false.** `tick_count` flagged 2 ms harmonic attacks and octave-shifted partials at −90 dBFS; zero-crossing pitch tracking spiked where two paths cancelled and read silence as −800 cents. Check the input first, use 5 ms attacks, medians and longer windows for low notes. In tests. (`testing.md`, `dsp-pitch.md`)
 - **Compare floats with a tolerance, blank nodes by content, and a custom unit with DPF's stock unit by symbol.** `ttlcmp.py` failed on a custom unit (blank-node IDs differ every parse), on a default of 80.71 (DPF writes float32: 80.7099990845), and on the oil-can delay's `%.0fms` display format against DPF's `units:ms`. In tests. (`tools/ttlcmp.py`)
 - **Make the gate fail on purpose once.** The first "warning" check passed only because the planted bug hadn't been applied. (`testing.md`)
+- **fast-math: one source, two builds, not bit-identical.** Tapestry Stereo's left side vs mono: −65 to −96 dB; identical without `-ffast-math`. Test against a bar. (`testing.md`)
 
 ## Faces and controls
 
 - **Live values reach a face only through `modgui:monitoredOutputs`, and only while MOD's feedback is flowing.** Trance Atlantic's ripples showed nothing on a Duo; the 10-second websocket tally showed only `ping` and `stats`: the 1.14 `data_ready` stall, not the plugin. Releasing it brought the values. Verified on a Duo. (`modgui.md`, `known-mod-issues.md`)
 - **A faint layer times a typical meter value is invisible.** 25% art opacity × 0.3 ≈ 8%. Tune the meter mapping and the art together. On a Duo. (`modgui.md`)
-- **Pre-render readouts; don't rely on a web font.** A dafont TTF didn't render on the unit, though it loaded in a Chromium reproduction. Image strips worked first time. Verified on a Duo. (`modgui.md`)
+- **A face font needs `!important`.** mod-ui's `main.css` forces its own font on every element with `!important`; that was why a dafont TTF "didn't render" on the unit. With `!important` Tapestry's LCD font rendered on a Duo; image strips remain the fallback. (`modgui.md`)
+- **Film elements in whole pixels.** A 63.5 px knob drifted across frames; 64 px fixed it. (`modgui.md`)
 - **mod-ui's film widget reads horizontal strips only.** A vertical HISE knob export had to be rotated into a row. Checked in `modgui.js`. (`modgui.md`)
 - **Step buttons aren't pick buttons.** `face_click_test.py` failed Travel and Mode buttons because a step's value depends on the state; it now presses step buttons (an attribute name containing `step`) and checks every press moves. In tests. (`tools/face_click_test.py`)
 - **Tempo sync is one TTL property; check the platform before adding ports.** Asked for BPM time entry, the oil-can delay's first plan was extra settings ports; `mod:tempoRelatedDynamicScalePoints` gives mod-ui's own Tempo + note value. Source-checked. (`lv2-and-mod-rules.md`)
@@ -96,6 +102,7 @@ The incidents come from five plugins built while writing this playbook: a hall r
 ## Bypass, presets and identity
 
 - **Rules learned on one kind of effect get scoped, not copied.** The first versions said "Tails on/off" and "soft-knee every output" for every plugin, because they came from delays. A gain pedal has no tail, and a knee on its output squashes the boost it exists for. Rules now carry the trait they apply to. (`effect-profile.md`)
+- **Presets leave Mix alone.** A preset sets the sound, not the balance. (`presets.md`)
 - **mod-host's own bypass is an instant switch.** It copies input to output from the next block, with no crossfade; on a processed signal that pops. An `lv2:enabled` port lets the plugin fade. Source-checked (mod-host `effects.c`). (`lv2-and-mod-rules.md`)
 
 - **Bypass puts the dry at unity whatever Mix says.** The digital delay faded the wet out but kept Mix's dry gain, so at full wet, bypass went silent (found on a Duo). Fade the dry gain to 1 alongside the wet. Fixed and tested. (`lv2-and-mod-rules.md`)

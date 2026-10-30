@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.8.0 — 2026-10-30
+
+From Tapestry and Tapestry Stereo:
+- **Correction, faces:** web fonts work. mod-ui forces its own font with `!important`; a face font needs `!important` too (verified on a Duo). Check the font has every character the readout prints. Image strips are now the fallback, not the rule.
+- **Faces:** size film elements in whole pixels (a 63.5 px knob drifted across frames).
+- **Path A:** a recipe's `_VERSION` is DPF's commit, never your repo's (now also a comment in every assembled recipe). Move to path B once the plugin is on GitHub. Size target 850 KB.
+- **Path B:** a stereo version as a second plugin in the same repo; agents on a linked Mac without delete permission (git locks, protected filenames).
+- **DSP:** one Noise control where 0 means none (grain included); tilt with a shelf, not a crossfade; stereo versions of a mono effect (share the mechanism, split the noise, link the detectors, left = mono).
+- **Testing:** `-ffast-math` keeps a stereo build of a mono source from matching it bit for bit; test against a bar.
+- **Presets:** leave Mix out.
+
 ## 0.7.1 — 2026-10-17
 
 From Trance Atlantic 2.6–2.7:

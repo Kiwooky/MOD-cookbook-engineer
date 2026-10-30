@@ -126,6 +126,7 @@ def main():
                '# connected over USB. Assembled by tools/assemble_recipe.py (MOD plugin playbook).\n')
 
     out = [header, '',
+           '# DPF\'s commit (the framework this recipe builds against), not your repo\'s: leave it.',
            '%s_VERSION = %s' % (P, DPF_SHA),
            '%s_SITE = %s' % (P, DPF_URL),
            '%s_SITE_METHOD = git' % P,

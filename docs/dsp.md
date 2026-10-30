@@ -38,6 +38,15 @@ This file holds the rules for **every** plugin. Then read only the files for you
 - **Opposite-polarity outputs:** a classic stereo trick (dry + wet on one side, dry − wet on the other) is wide in stereo but cancels the wet if both outputs end up in one mono input. Say so in the README, and recommend one output for mono rigs.
 - **Level:** guitars into a MOD peak around −20 dBFS (the nominal input level isn't documented; this is from testing). Synths, keys and drum machines at line level are much hotter. Tune level-sensitive effects (drive, compressors, gates, envelope filters, sag) for the source the person will use, not for a hot test signal.
 
+## Tone
+
+- **A tilt control is a shelf, not a crossfade.** Fading between a low-pass and a high-pass of the signal lifted the mids at the centre and dipped them either side. A first-order shelf whose gain passes through unity at the centre is flat at noon and tilts cleanly. In tests (Tapestry).
+
+## Stereo versions of a mono effect
+
+- **Share the mechanism, split the randomness, link the detectors.** What's one part in the real thing (a transport, an LFO, dropout timing) stays shared, or the two sides chorus against each other. Noise is generated per side, so it has width (L/R correlation near 0). Compressors, auto-level and noise reduction listen to both sides (the louder side, or the mean power), so a hit on one side doesn't move the image. In tests (Tapestry Stereo).
+- **Keep the left side on the mono plugin's random seed,** and the left output *is* the mono plugin with the same source in both inputs. That makes a strong test (`testing.md`).
+
 ## Recreations: resistor mixing networks
 
 Switch matrices and mixers on old gear often join several taps through resistors onto one node. Model the node as a passive bus, not a sum: V = Σ(Gᵢ·Vᵢ) ÷ (ΣGᵢ + G_load), with G = 1/R and G_load the next stage's input. Engaging more sources then gets fuller but less than additive, as on the hardware; plain summing made the BBD echo's button combinations far too loud. Normalise one reference setting to unity and let the rest follow (in tests).
@@ -45,4 +54,5 @@ Switch matrices and mixers on old gear often join several taps through resistors
 ## Noise
 
 - **Noise as a modulation source** (some "chorus" circuits are a noise diode, not an LFO): white noise → one-pole low-pass, scaled by √(2/a) (a = the filter coefficient) for unit variance, then a soft clip and a one-pole high-pass. It gives a band-limited random drift whose level doesn't depend on the sample rate. The BBD echo: 1.6 Hz low-pass and 0.5 Hz high-pass from the schematic, added to the BBD clock (in tests).
+- **One Noise control, and 0 means none of any kind.** Tapestry's Hiss knob at 0 still left a gritty rasp on cheap formats: it was the tape's grain (modulation noise), not hiss. Putting all of it on one knob (0 clean, 1 grain only, 2 and up adds hiss, 10 authentic) kept the character for those who want it. By ear on a Duo.
 - **Modelled hiss and hum are rarely wanted.** In the oil-can delay's first hardware test, hiss and hum were switched off within seconds. Players kept the *movement* (warble, wear) and dropped the dirt. Build clean; add character through movement and saturation.

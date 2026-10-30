@@ -20,6 +20,14 @@ A repo created with GitHub's "Add a license" option starts with that licence in 
 
 Repos made with earlier playbook versions have a vendored copy of DPF in `dpf/`. To switch: `git rm -r dpf` and commit, then run `tools/add_dpf_submodule.sh` and commit, and update the package `.mk` from the template. Keep the removal and the submodule in separate commits, or commit in Terminal: GitHub Desktop fails on a combined commit with "dpf: is a directory - add individual files instead". Ports and URI don't change.
 
+## A stereo version in the same repo
+
+Make it a second plugin from the same source (Ouraverb Stereo, Tapestry Stereo):
+- `plugins/<name>/` uses `DISTRHO_PLUGIN_NUM_INPUTS` as its channel count; `plugins/<name>-stereo/` holds a `DistrhoPluginInfo.h` with two inputs and outputs, its own name, label, URI and unique ID, and a one-line `.cpp` that `#include`s the mono one.
+- `bundle/<name>-stereo.lv2/` has its own TTLs and only the face files that differ (a panel with a STEREO badge, screenshot, thumbnail). The top-level `Makefile` copies the mono `modgui/` into the stereo bundle first, then the stereo files over it; `make NAME=<name>-stereo` builds it. Its own package file passes `NAME=` too.
+- Generate both bundles' TTL and presets from one table, so they can't drift.
+Verified on a Duo (Ouraverb Stereo); in tests (Tapestry Stereo).
+
 ## Identity
 
 The URI is your repo URL (`https://github.com/<owner>/<repo>`), set in `DISTRHO_PLUGIN_URI`, `manifest.ttl`, `<name>.ttl` and `modgui.ttl`. Prefix your bundle and package name with your brand (`mybrand-echo`) to avoid clashes with other people's plugins.
@@ -33,6 +41,8 @@ The URI is your repo URL (`https://github.com/<owner>/<repo>`), set in `DISTRHO_
 5. Upload the package `.mk` at builder.mod.audio and install. The filename must match the prefix (`mybrand-echo.mk` ↔ `MYBRAND_ECHO_`).
 
 **An agent that can't push** (a cloud session without the owner's GitHub access): make the commit there, `git bundle create x.bundle <base>..HEAD`, copy the bundle into the person's clone (not into `.git`), then `git fetch x.bundle HEAD && git reset --keep FETCH_HEAD` and delete the bundle. The person pushes from GitHub Desktop as usual. Give each regenerated bundle a new filename: one rewritten under the same name in the same batch of tool calls arrived as the old copy. Verified.
+
+**An agent on a linked Mac without permission to delete** (Claude's remote device bridge): git can't remove its own lock and temporary files, so the next git command fails with "File exists". Move leftover locks aside directly under `.git` (`mv .git/index.lock .git/stale-index-lock`), never under `.git/refs`, or ask for delete permission once. The bridge's file-copy tool refuses some names (`Makefile`): write those through the shell. Verified.
 
 ## Continuous checks
 
