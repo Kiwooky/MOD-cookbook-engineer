@@ -118,12 +118,15 @@ def render(tpl, ctx):
         return ''.join(render(body, ctx + [it]) for it in items)
     out = re.sub(r'\{\{#([\w.]+)\}\}(.*?)\{\{/\1\}\}', sect, tpl, flags=re.S)
 
+    # a name we don't have is mod-ui's: the jacks' {{symbol}} and {{name}} inside the
+    # {{#effect...}} sections. Blanking them left every jack without a port, so the
+    # pedal showed no inputs or outputs (Crossroads, 2026-11)
     def var(m):
         k = m.group(1)
         for c in reversed(ctx):
             if k in c:
                 return str(c[k]).replace('&', '&amp;').replace('<', '&lt;').replace('"', '&quot;')
-        return ''
+        return m.group(0)
     return re.sub(r'(?<!\{)\{\{(\w+)\}\}(?!\})', var, out)
 
 

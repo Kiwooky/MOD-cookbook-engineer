@@ -15,7 +15,7 @@
 - Bypass: `mod-role="bypass"`. Its classes are inverted: `on` = **bypassed**, `off` = active.
 - **A separate On/Off light:** `mod-role="bypass-light"` gets class `on` while the effect is **on** (not inverted). The light can sit away from the footswitch; it isn't clickable. Verified on a Duo.
 - **Multi-position switches (enumerations):** a film works, but a click only steps to the next position and wraps, whatever part of it you click. To let people click the position they want, lay transparent click zones (plain divs, no `mod-role`, higher `z-index`) over each position and have the face script call `funcs.set_port_value('<symbol>', value)` on click. The film still draws the switch. (the digital delay's range lever.)
-- Audio jacks: copy the `{{#effect.ports.audio.input}}…` blocks from a stock template.
+- Audio jacks: copy the `{{#effect.ports.audio.input}}…` blocks from a stock template, with `title="{{name}}"` and `mod-port-symbol="{{symbol}}"` left in them for mod-ui to fill. A jack with an empty `mod-port-symbol` has no port: the pedal shows no inputs or outputs (Crossroads, from `stock_face.py` before 0.9.2). `assemble_recipe.py` refuses such a face.
 
 ## CSS
 

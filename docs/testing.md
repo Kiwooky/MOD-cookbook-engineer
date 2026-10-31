@@ -35,7 +35,7 @@ By trait:
 
 - **Tail:** bypass with Tails on (the tail rings out) and off (the wet fades).
 - **Feedback loop:** torture at max feedback stays under 0 dBFS; the runaway grid.
-- **Nonlinear / gain:** no aliasing at full gain (a 3–5 kHz sine makes no tones below it); gain at Level max as specified; default loudness against bypass (RMS).
+- **Nonlinear / gain:** it saturates: at max drive a −20 dBFS sine comes out with at least 10 % THD (`thd()`; a clean boost is the exception, tested by its gain instead); no aliasing at full gain (a 3–5 kHz sine makes no tones below it); gain at Level max as specified; default loudness against bypass (RMS).
 - **Level-sensitive:** at the source's real level.
 
 - **Reverbs:** RT60 (`rt60`) at all three rates (agreeing within a few tenths of a second), the decay knob monotonic over its range, pre-delay by onset (`onset_ms`), stereo outputs decorrelated (|corr| < 0.2), and the tail reaching silence.

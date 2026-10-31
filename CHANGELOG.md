@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.9.2 — 2026-11-01
+
+From Crossroads (a community drive + reverb, built with GLM 5.2):
+- **Fix, stock faces:** `tools/stock_face.py` blanked `{{symbol}}` and `{{name}}` inside the `{{#effect.ports...}}` jack sections it leaves for mod-ui, so every stock face had jacks with no port: the pedal showed no inputs or outputs. It now leaves names it doesn't know for mod-ui. Faces made with an earlier version: run it again.
+- **Check:** `tools/assemble_recipe.py` refuses a face with a jack whose `mod-port-symbol` is empty or missing (`docs/modgui.md`).
+- **Drive:** enough gain to reach the clipping curve at guitar level (overdrive ~30–40 dB at the top, an exponential knob), with the numbers behind it (`docs/dsp-drive.md`, the nonlinear / gain trait). Crossroads' 1–6× drive passed every loudness and alias test and still sounded clean.
+- **Testing:** `thd()` in `lv2test.py`; a drive must give at least 10 % THD on a −20 dBFS sine at max drive (`docs/testing.md`).
+
 ## 0.9.1 — 2026-10-31
 
 - **Contributing:** new `CONTRIBUTING.md`: contributions are MIT; send rules and incidents in your own words, never code you don't own (no GPL code); lessons from closed-source plugins welcome without their code; contributors credited in the CHANGELOG. The harvest prompt (`docs/harvesting.md`) asks for the same.

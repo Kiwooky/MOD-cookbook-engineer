@@ -2,7 +2,7 @@
 
 In a plugin's test script:
 
-    from lv2test import Plugin, check, done, db, rms, centroid, tick_count, warble_cents, pluck_train, harmonic_pluck_train, rt60, onset_ms
+    from lv2test import Plugin, check, done, db, rms, centroid, thd, tick_count, warble_cents, pluck_train, harmonic_pluck_train, rt60, onset_ms
     p = Plugin(order=['time', 'feedback', 'mix', 'tails', 'lv2_enabled'],
                defaults=dict(time=350, feedback=40, mix=35, tails=1, lv2_enabled=1),
                n_in=1, n_out=1)
@@ -112,6 +112,22 @@ def centroid(seg, sr):
     s = np.abs(np.fft.rfft(seg * np.hanning(len(seg))))
     f = np.fft.rfftfreq(len(seg), 1 / sr)
     return float((s * f).sum() / max(s.sum(), 1e-12))
+
+
+def thd(seg, sr, f0, harmonics=10):
+    """Total harmonic distortion (%) of a steady sine at f0: harmonics 2..N against the
+    fundamental. Proves a drive drives: a soft clip that never leaves its linear part
+    passes every loudness and alias test at about 1 % (Crossroads, 2026-11)."""
+    seg = np.asarray(seg, np.float64)
+    s = np.abs(np.fft.rfft(seg * np.hanning(len(seg))))
+    f = np.fft.rfftfreq(len(seg), 1 / sr)
+    def peak(fr):
+        if fr >= sr / 2:
+            return 0.0
+        i = int(round(fr * len(seg) / sr))
+        return float(s[max(i - 3, 0):i + 4].max())
+    h = [peak(f0 * k) for k in range(2, harmonics + 1)]
+    return 100.0 * float(np.sqrt(np.sum(np.square(h)))) / max(peak(f0), 1e-12)
 
 
 def pluck_train(sr, seconds=10.0, level=0.15, notes=(196, 247, 147, 330, 220, 165), every=1.5):

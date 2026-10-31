@@ -39,6 +39,22 @@ def b64lines(data):
     return '\n'.join(s[i:i + 76] for i in range(0, len(s), 76))
 
 
+# a jack (audio / MIDI / CV port element) needs its port: mod-port-symbol="{{symbol}}"
+# inside the {{#effect.ports...}} section, or a real symbol. An empty one draws the
+# jack with no port, so the pedal shows no inputs or outputs (Crossroads, 2026-11)
+JACK = re.compile(r'<[^>]*mod-role="(?:input|output)-(?:audio|midi|cv)-port"[^>]*>')
+
+
+def check_jacks(path):
+    for tag in JACK.findall(open(path).read()):
+        m = re.search(r'mod-port-symbol="([^"]*)"', tag)
+        if not m or not m.group(1).strip():
+            sys.exit('%s: a jack without its port (mod-port-symbol empty or missing):\n  %s\n'
+                     'Use mod-port-symbol="{{symbol}}" inside the {{#effect.ports...}} sections '
+                     '(docs/modgui.md). A stock face made before playbook 0.9.2: run tools/stock_face.py again.'
+                     % (path, tag))
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('src'); ap.add_argument('bundle'); ap.add_argument('out')
@@ -97,6 +113,8 @@ def main():
             dest = '%s/%s' % (pkg, relp)
             if rel != '.':
                 install.append('\tmkdir -p %s/%s' % (pkg, rel))
+            if ext == '.html':
+                check_jacks(src)
             if ext in TEXT_EXT:
                 blocks.append('define %s\n%s\nendef\n' % (var, esc(open(src).read().rstrip('\n'))))
                 install.append('\t$(file >%s,$(%s))' % (t, var))
