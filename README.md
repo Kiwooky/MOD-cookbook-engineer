@@ -10,7 +10,7 @@ It works with **any AI that can fetch a link**, from a plain chat to a coding ag
 
 Open a chat with your AI and send it this:
 
-> Read https://github.com/Kiwooky/MOD-plugin-playbook/blob/main/AGENTS.md?v=0.9.0 and help me build a plugin for my MOD.
+> Read https://github.com/Kiwooky/MOD-plugin-playbook/blob/main/AGENTS.md?v=0.9.1 and help me build a plugin for my MOD.
 
 It reads the cookbook and the playbook, asks what you'd like to build, proposes the knobs, and hands you a `.mk` file. Upload that at [builder.mod.audio/buildroot](https://builder.mod.audio/buildroot) with your MOD connected over USB, then play it and tell the AI what you heard.
 
@@ -51,7 +51,7 @@ The agent can't upload to the builder, push to GitHub with your account, or hear
 
 ## Contributing
 
-Lessons from your own builds are welcome: see `docs/harvesting.md`. Keep claims honest: "verified on a Duo", "in tests", or "believed".
+Lessons from your own builds are welcome, including from closed-source and commercial plugins (the rule and the incident, not the code): see `CONTRIBUTING.md` and `docs/harvesting.md`. Contributions are MIT and credited in the CHANGELOG. Keep claims honest: "verified on a Duo", "in tests", or "believed".
 
 ## Licence
 

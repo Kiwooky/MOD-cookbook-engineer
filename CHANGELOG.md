@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.9.1 — 2026-10-31
+
+- **Contributing:** new `CONTRIBUTING.md`: contributions are MIT; send rules and incidents in your own words, never code you don't own (no GPL code); lessons from closed-source plugins welcome without their code; contributors credited in the CHANGELOG. The harvest prompt (`docs/harvesting.md`) asks for the same.
+
 ## 0.9.0 — 2026-10-31
 
 - **Licence: MIT** (was GPL-3.0-or-later), template plugin included, at the request of MOD's founder so people can build commercial plugins with it. Plugins built from the template choose their own licence and keep the MIT notice. The MOD SDK stock face art stays GPL-3.0: closed-source plugins use the placeholder face or their own art (`AGENTS.md`, `docs/modgui.md`). Versions released before 0.9.0 remain GPL-3.0 for anyone who has them.

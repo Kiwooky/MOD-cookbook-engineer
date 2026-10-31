@@ -11,7 +11,11 @@ This playbook started from a hall reverb's handover and an oil-can delay build. 
 
 ## A prompt to paste into an old session
 
-> I'm building a shared MOD plugin playbook for the community (any LLM agent should be able to use it). Look back over this whole session and list everything we learned that would help someone building a different plugin: build/upload problems and their fixes, MOD/mod-ui quirks, DSP patterns, test techniques, face (modgui) techniques, and ways of working that saved time. For each item give: the rule in one line, what happened that taught it, and whether it's verified (on hardware / in tests) or only believed. Leave out things specific to this one plugin's sound. Also flag anything we did that turned out to be a mistake.
+> I'm building a shared MOD plugin playbook for the community (any LLM agent should be able to use it). Look back over this whole session and list everything we learned that would help someone building a different plugin: build/upload problems and their fixes, MOD/mod-ui quirks, DSP patterns, test techniques, face (modgui) techniques, and ways of working that saved time. For each item give: the rule in one line, what happened that taught it, and whether it's verified (on hardware / in tests) or only believed. Leave out things specific to this one plugin's sound. Also flag anything we did that turned out to be a mistake. Write every rule in your own words and include no code copied from other people's projects (the playbook is MIT; describe the technique instead). Leave out anything I've marked private.
+
+## Credit and licence
+
+Contributions are MIT, like the rest (`CONTRIBUTING.md`). Credit each harvest in `CHANGELOG.md` with what it came from and who contributed it. Lessons from closed-source or commercial plugins are welcome: the rule and the incident, never the code.
 
 ## Before you push (whoever pushes)
 
