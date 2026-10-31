@@ -23,7 +23,8 @@ needs, 256-colour PNGs to keep a single-file recipe small), links modgui.ttl fro
 manifest.ttl, then renders the screenshot and thumbnail with tools/render_face.py using
 MOD's own fonts. Art is fetched from mod-sdk at a pinned commit into $PB_CACHE.
 
-Licence: the stock art and templates are mod-sdk's (GPL-3.0), like the playbook and its template.
+Licence: the stock art and templates are mod-sdk's (GPL-3.0); the playbook is MIT. Fine for open-source plugins;
+for a closed-source one use tools/placeholder_face.py or original art.
 They ship inside your bundle; credit mod-sdk in the plugin's README.
 Needs: pillow rdflib (+ playwright for the screenshot).
 """

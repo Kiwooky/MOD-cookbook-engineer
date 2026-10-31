@@ -10,7 +10,7 @@ It works with **any AI that can fetch a link**, from a plain chat to a coding ag
 
 Open a chat with your AI and send it this:
 
-> Read https://github.com/Kiwooky/MOD-plugin-playbook/blob/main/AGENTS.md?v=0.8.0 and help me build a plugin for my MOD.
+> Read https://github.com/Kiwooky/MOD-plugin-playbook/blob/main/AGENTS.md?v=0.9.0 and help me build a plugin for my MOD.
 
 It reads the cookbook and the playbook, asks what you'd like to build, proposes the knobs, and hands you a `.mk` file. Upload that at [builder.mod.audio/buildroot](https://builder.mod.audio/buildroot) with your MOD connected over USB, then play it and tell the AI what you heard.
 
@@ -55,6 +55,6 @@ Lessons from your own builds are welcome: see `docs/harvesting.md`. Keep claims 
 
 ## Licence
 
-GPL-3.0-or-later (`LICENSE`). Copyright (c) 2026 New Horizon Electronics and contributors.
+MIT (`LICENSE`). Copyright (c) 2026 New Horizon Electronics and contributors.
 
-This covers the template plugin too, so plugins built from it are GPL-3.0-or-later. The recipe format and parts of the template follow MOD's [plugin cookbook](https://github.com/mod-audio/mod-plugin-cookbook), MIT, Copyright (c) 2026 MOD Audio Limited (`LICENSES/MIT-mod-plugin-cookbook.txt`). DPF (fetched by the tools, or a submodule in path B repos) is ISC. The MOD SDK stock pedal art that `tools/stock_face.py` fetches is GPL-3.0.
+Build what you like with it, including commercial and closed-source plugins: keep the MIT notice with anything that contains a substantial part of the playbook or its template (a line in your plugin's README or manual does it). Your plugin's own licence is your choice. The recipe format and parts of the template follow MOD's [plugin cookbook](https://github.com/mod-audio/mod-plugin-cookbook), MIT, Copyright (c) 2026 MOD Audio Limited (`LICENSES/MIT-mod-plugin-cookbook.txt`). DPF (fetched by the tools, or a submodule in path B repos) is ISC. The MOD SDK stock pedal art that `tools/stock_face.py` fetches is GPL-3.0 and stays so: for a closed-source plugin, use your own art or the placeholder face (`docs/modgui.md`).

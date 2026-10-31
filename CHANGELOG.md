@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.9.0 — 2026-10-31
+
+- **Licence: MIT** (was GPL-3.0-or-later), template plugin included, at the request of MOD's founder so people can build commercial plugins with it. Plugins built from the template choose their own licence and keep the MIT notice. The MOD SDK stock face art stays GPL-3.0: closed-source plugins use the placeholder face or their own art (`AGENTS.md`, `docs/modgui.md`). Versions released before 0.9.0 remain GPL-3.0 for anyone who has them.
+
 ## 0.8.0 — 2026-10-30
 
 From Tapestry and Tapestry Stereo:

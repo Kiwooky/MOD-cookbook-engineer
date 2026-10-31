@@ -98,7 +98,7 @@ How it decides:
 
 What it writes: `modgui.ttl` (with `modgui:model/panel/color/knob` and the port list), the SDK template pre-rendered with the real port names, the SDK CSS, and only the art the chosen look uses, quantised to 256 colours (80–115 KB, fine for a single-file recipe). Then it renders the screenshot and thumbnail with MOD's own fonts (Nexa, Questrial, England Hand), fetched from mod-ui for the render only; the unit serves them itself.
 
-- **Licence:** the stock art, templates and CSS are mod-sdk's, GPL-3.0, the same family as the playbook's own licence. They ship inside the bundle; credit mod-sdk in the plugin's README.
+- **Licence:** the stock art, templates and CSS are mod-sdk's, GPL-3.0 (the playbook itself is MIT). They ship inside the bundle; credit mod-sdk in the plugin's README. That suits open-source plugins. For a closed-source or commercial plugin, don't ship them: use `tools/placeholder_face.py` (no third-party art) or original artwork.
 - **Run `tools/face_click_test.py` afterwards,** as for any face. It drives the boxy dropdown (open, pick each option, with and without a wobble) and the extra footswitches with mod-ui's own code.
 - **A stock face is a starting point.** Swap in your own background, keep the SDK's control positions, or replace the lot with real artwork (below). The ports don't change, so neither do saved pedalboards.
 - Checked in tests: all four styles, a selector and an extra footswitch render and pass the click test (mod-sdk `ba1e9be8`). Not yet seen on a unit.

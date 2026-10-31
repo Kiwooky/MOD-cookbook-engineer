@@ -14,7 +14,7 @@ dpf/                             DPF as a git submodule (tools/add_dpf_submodule
 docs/spec.md, CHANGELOG.md, README.md, LICENSE, ARTWORK-LICENSE.md
 ```
 
-A repo created with GitHub's "Add a license" option starts with that licence in its initial commit (the hall reverb's came with GPL-2 while the code was MIT). Check `LICENSE` matches what the person intends before the first push, and say if you replace it. A plugin built from the template is GPL-3.0-or-later: pick GPL-3.0 in GitHub's menu, or copy the playbook's `LICENSE`.
+A repo created with GitHub's "Add a license" option starts with that licence in its initial commit (the hall reverb's came with GPL-2 while the code was MIT). Check `LICENSE` matches what the person intends before the first push, and say if you replace it. The template is MIT, so the plugin's licence is the person's choice (MIT unless they say otherwise); keep the template's MIT notice either way. With a stock face (GPL-3.0 art), the plugin should be open source.
 
 `templates/plugin/` has all of this except `dpf/` and the docs. **Add DPF as a git submodule** with `tools/add_dpf_submodule.sh` (pinned to the commit the playbook tests against). This is DPF's recommended setup. The package `.mk` fetches it with two lines MOD's own packages use (`<P>_GIT_SUBMODULES = y` and `<P>_PRE_DOWNLOAD_HOOKS += MOD_PLUGIN_BUILDER_DOWNLOAD_WITH_SUBMODULES`, from mod-plugin-builder; Wasted Audio's `wstd-dlay` is one example). Verified on builder.mod.audio (2026-10-08, `tests/submodule-test.mk`).
 
